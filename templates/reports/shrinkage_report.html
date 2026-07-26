@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Shrinkage Report{% endblock %}
+{% block page_title %}Shrinkage Report{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="kpi-info"><div class="kpi-label">Total Shrinkage</div><div class="kpi-value" style="color:var(--danger)">{{ total_shrinkage|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-box-open"></i></div><div class="kpi-info"><div class="kpi-label">Records</div><div class="kpi-value">{{ movements.count|nepali }}</div></div></div>
+</div>
+
+<div class="grid-3 gap-4 mb-4">
+    {% for r in by_reason %}
+    <div class="text-center" style="padding:20px;border-radius:12px;background:var(--card-bg);border:1px solid var(--border)">
+        <div style="font-size:24px;font-weight:900;color:var(--danger)">{{ r.total|nepali }}</div>
+        <div class="text-sm text-muted">{{ r.reason_code__label|default:r.reason_code__code }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-boxes-stacked"></i> By Product</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Product</th><th>Qty Lost</th></tr></thead>
+                <tbody>
+                    {% for p in by_product %}
+                    <tr><td style="font-weight:600">{{ p.product__name }}</td><td style="color:var(--danger);font-weight:700">{{ p.total }}</td></tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted" style="padding:20px">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-warehouse"></i> By Warehouse</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Warehouse</th><th>Qty Lost</th></tr></thead>
+                <tbody>
+                    {% for w in by_warehouse %}
+                    <tr><td style="font-weight:600">{{ w.warehouse__name }}</td><td style="color:var(--danger);font-weight:700">{{ w.total }}</td></tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center text-muted" style="padding:20px">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Shrinkage Details</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Date</th><th>Product</th><th>Warehouse</th><th>Qty</th><th>Reason</th><th>User</th></tr></thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td class="text-sm text-muted">{{ m.created_at|date:"d M Y" }}</td>
+                    <td style="font-weight:600">{{ m.product.name }}</td>
+                    <td>{{ m.warehouse.name }}</td>
+                    <td style="color:var(--danger);font-weight:600">{{ m.quantity_delta|nepali }}</td>
+                    <td>{{ m.reason_code|default:"-" }}</td>
+                    <td>{{ m.user.username|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted" style="padding:30px">No records.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'customers/portal_base.html' %}
+{% load number_tags %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block portal_content %}
+<div style="max-width:1000px;margin:0 auto;padding:40px 32px">
+    <a href="{% url 'portal_catalog' %}" style="color:var(--primary);text-decoration:none;font-size:14px">&larr; Back to Catalog</a>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:24px" class="product-detail-grid">
+        <div>
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" style="width:100%;border-radius:12px;max-height:400px;object-fit:cover" id="main-image">
+            {% elif images %}
+            <img src="{{ images.first.image.url }}" style="width:100%;border-radius:12px;max-height:400px;object-fit:cover" id="main-image">
+            <div style="display:flex;gap:8px;margin-top:12px">{% for img in images %}<img src="{{ img.image.url }}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid {% if forloop.first %}var(--primary){% else %}transparent{% endif %}" onclick="document.getElementById('main-image').src=this.src">{% endfor %}</div>
+            {% else %}<div class="placeholder-img" style="height:300px;border-radius:12px;font-size:60px"><i class="fa-solid fa-star"></i></div>{% endif %}
+        </div>
+        <div>
+            <h1 style="font-size:28px;font-weight:800;margin-bottom:8px">{{ product.name }}</h1>
+            <div style="font-size:14px;color:var(--text-muted);margin-bottom:16px">SKU: {{ product.sku }}</div>
+            <div style="font-size:32px;font-weight:800;margin-bottom:16px;color:var(--primary)">रू {{ product.sale_price|floatformat:2|nepali }}</div>
+            <p style="color:var(--text-muted);line-height:1.7;margin-bottom:24px">{{ product.description|default:"No description available." }}</p>
+            {% if variants %}<div style="margin-bottom:16px"><label style="display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Select Variant:</label>
+                <select class="form-input" id="variant-select">{% for v in variants %}<option value="{{ v.pk }}">{{ v.display_name }} - रू {{ v.effective_sale_price|floatformat:2|nepali }}</option>{% endfor %}</select></div>{% endif %}
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+                <label style="font-size:13px;font-weight:600;color:var(--text-muted)">Quantity:</label>
+                <div style="display:flex;align-items:center;border:2px solid var(--border);border-radius:10px;overflow:hidden">
+                    <button type="button" onclick="var inp=document.getElementById('qty-input');if(parseInt(inp.value)>1)inp.value=parseInt(inp.value)-1" style="width:40px;height:40px;border:none;background:var(--input-bg);color:var(--text);cursor:pointer;font-size:18px;font-weight:700">-</button>
+                    <input type="number" id="qty-input" name="quantity" value="1" min="1" style="width:50px;text-align:center;border:none;background:transparent;color:var(--text);font-size:16px;font-weight:700;outline:none;-moz-appearance:textfield">
+                    <button type="button" onclick="var inp=document.getElementById('qty-input');inp.value=parseInt(inp.value)+1" style="width:40px;height:40px;border:none;background:var(--input-bg);color:var(--text);cursor:pointer;font-size:18px;font-weight:700">+</button>
+                </div>
+            </div>
+            <form method="post" action="{% url 'portal_cart_add' product.pk %}">
+                {% csrf_token %}{% if variants %}<input type="hidden" name="variant_id" id="variant-id" value="{{ variants.first.pk }}">{% endif %}
+                <input type="hidden" name="quantity" id="qty-hidden" value="1">
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;font-size:16px"><i class="fa-solid fa-cart-shopping"></i> Add to Cart</button>
+            </form>
+        </div>
+    </div>
+</div>
+<style>
+    @media (max-width: 768px) { .product-detail-grid { grid-template-columns: 1fr !important; } }
+</style>
+{% endblock %}
+{% block extra_js %}<script>
+const sel=document.getElementById('variant-select');if(sel)sel.addEventListener('change',function(){document.getElementById('variant-id').value=this.value});
+const qtyInput=document.getElementById('qty-input');const qtyHidden=document.getElementById('qty-hidden');
+if(qtyInput)qtyInput.addEventListener('input',function(){qtyHidden.value=this.value});
+if(qtyInput)qtyInput.addEventListener('change',function(){qtyHidden.value=this.value});
+</script>{% endblock %}

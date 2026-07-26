@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Returns{% endblock %}
+{% block page_title %}Returns{% endblock %}
+{% block content %}
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>#</th><th>Invoice</th><th>Requested By</th><th>Status</th><th>Refund</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for r in returns %}
+                <tr>
+                    <td style="font-weight:600">#{{ r.pk }}</td>
+                    <td><a href="{% url 'transaction_detail' r.original_transaction.uuid %}" style="color:var(--primary);text-decoration:none">{{ r.original_transaction.invoice_number }}</a></td>
+                    <td>{{ r.requested_by.username|default:"-" }}</td>
+                    <td><span class="badge {% if r.status == 'Completed' %}badge-success{% elif r.status == 'Requested' %}badge-warning{% elif r.status == 'Rejected' %}badge-danger{% else %}badge-info{% endif %}">{{ r.status }}</span></td>
+                    <td>रू {{ r.refund_amount|floatformat:2 }}</td>
+                    <td class="text-sm text-muted">{{ r.created_at|date:"d M Y" }}</td>
+                    <td><a href="{% url 'return_detail' r.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No returns.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination returns %}
+{% endblock %}

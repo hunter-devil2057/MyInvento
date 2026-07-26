@@ -1,0 +1,13 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="section">
+<table>
+<thead><tr><th>#</th><th>Supplier</th><th>Contact</th><th class="text-right">Lead Time</th><th class="text-right">On-Time %</th><th class="text-right">POs</th><th class="text-right">Total Spend</th></tr></thead>
+<tbody>
+{% for s in suppliers %}
+<tr><td>{{ forloop.counter }}</td><td class="font-bold">{{ s.name }}</td><td>{{ s.contact_name|default:"-" }}</td><td class="text-right">{{ s.lead_time_days }} days</td><td class="text-right"><span class="badge {% if s.on_time_pct >= 90 %}badge-green{% elif s.on_time_pct >= 70 %}badge-yellow{% else %}badge-red{% endif %}">{{ s.on_time_pct }}%</span></td><td class="text-right">{{ s.po_count }}</td><td class="text-right font-bold">रू {{ s.total_spend|default:0|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

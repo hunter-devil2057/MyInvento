@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Purchase Orders{% endblock %}
+{% block page_title %}Purchase Orders{% endblock %}
+{% block content %}
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?status=" class="btn {% if not selected_status %}btn-primary{% else %}btn-outline{% endif %} btn-sm">All</a>
+        <a href="?status=Draft" class="btn {% if selected_status == 'Draft' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Draft</a>
+        <a href="?status=Sent" class="btn {% if selected_status == 'Sent' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Sent</a>
+        <a href="?status=Partially+Received" class="btn {% if selected_status == 'Partially Received' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Partial</a>
+        <a href="?status=Received" class="btn {% if selected_status == 'Received' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Received</a>
+    </div>
+    <a href="{% url 'po_create' %}" class="btn btn-primary">+ Create PO</a>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>PO #</th><th>Supplier</th><th>Warehouse</th><th>Date</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for po in pos %}
+                <tr>
+                    <td><a href="{% url 'po_detail' po.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ po.po_number }}</a></td>
+                    <td>{{ po.supplier.name }}</td>
+                    <td class="text-sm">{{ po.destination_warehouse.name }}</td>
+                    <td class="text-sm text-muted">{{ po.order_date }}</td>
+                    <td><span class="badge {% if po.status == 'Received' %}badge-success{% elif po.status == 'Sent' %}badge-info{% elif po.status == 'Draft' %}badge-secondary{% elif po.status == 'Cancelled' %}badge-danger{% else %}badge-warning{% endif %}">{{ po.status }}</span></td>
+                    <td style="font-weight:600">रू {{ po.total_cost|floatformat:2|nepali }}</td>
+                    <td><a href="{% url 'po_detail' po.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-file-csv"></i></span><h3>No purchase orders</h3><p>Create a purchase order to restock inventory.</p><a href="{% url 'po_create' %}" class="btn btn-primary mt-2">+ Create PO</a></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination pos status=selected_status %}
+{% endblock %}

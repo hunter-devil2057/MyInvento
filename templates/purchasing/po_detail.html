@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}{{ po.po_number }}{% endblock %}
+{% block page_title %}PO {{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'po_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Purchase Orders</a>
+    <div></div>
+    <div class="flex gap-2">
+        {% if po.status == 'Draft' %}
+        <form method="post" action="{% url 'po_send' po.uuid %}">{% csrf_token %}<button class="btn btn-primary">Mark as Sent</button></form>
+        <form method="post" action="{% url 'po_cancel' po.uuid %}" onsubmit="return confirm('Cancel this PO?')">{% csrf_token %}<button class="btn btn-danger">Cancel</button></form>
+        <a href="{% url 'po_delete' po.uuid %}" class="btn btn-danger">Delete</a>
+        {% endif %}
+        {% if po.status == 'Sent' or po.status == 'Partially Received' %}
+        <a href="#" onclick="document.getElementById('receive-form').style.display='block';return false" class="btn btn-success">Receive Stock</a>
+        {% endif %}
+    </div>
+</div>
+<div class="grid-3 mb-6">
+    <div class="card"><div class="card-body"><div class="kpi-label">Supplier</div><div style="font-weight:600">{{ po.supplier.name }}</div></div></div>
+    <div class="card"><div class="card-body"><div class="kpi-label">Warehouse</div><div style="font-weight:600">{{ po.destination_warehouse.name }}</div></div></div>
+    <div class="card"><div class="card-body"><div class="kpi-label">Created By</div><div style="font-weight:600">{{ po.created_by.username }}</div></div></div>
+</div>
+<div class="card mb-6">
+    <div class="card-header"><h3>Order Lines</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Product</th><th>Qty Ordered</th><th>Qty Received</th><th>Unit Cost</th><th>Line Total</th></tr></thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td style="font-weight:600">{{ line.product.name }}</td>
+                    <td>{{ line.quantity_ordered|nepali }}</td>
+                    <td><span class="badge {% if line.is_fully_received %}badge-success{% else %}badge-warning{% endif %}">{{ line.quantity_received|nepali }}</span></td>
+                    <td>रू {{ line.unit_cost|floatformat:2|nepali }}</td>
+                    <td style="font-weight:600">रू {{ line.total_cost|floatformat:2|nepali }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if po.status == 'Sent' or po.status == 'Partially Received' %}
+<div class="card" id="receive-form" style="display:none">
+    <div class="card-header"><h3>Receive Stock</h3></div>
+    <div class="card-body">
+        <form method="post" action="{% url 'po_receive' po.uuid %}">
+            {% csrf_token %}
+            <table>
+                <thead><tr><th>Product</th><th>Remaining</th><th>Receive Qty</th><th>Unit Cost</th></tr></thead>
+                <tbody>
+                    {% for line in lines %}
+                    <tr>
+                        <td style="font-weight:600">{{ line.product.name }}</td>
+                        <td>{{ line.remaining_quantity|nepali }}</td>
+                        <td><input type="number" name="received_{{ line.pk }}" value="0" min="0" max="{{ line.remaining_quantity }}" class="form-input" style="width:100px"></td>
+                        <td><input type="number" name="cost_{{ line.pk }}" value="{{ line.unit_cost }}" step="0.01" min="0" class="form-input" style="width:120px"></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-success mt-4">Confirm Receipt</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

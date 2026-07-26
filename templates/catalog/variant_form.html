@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}{% if creating %}Add Variant{% else %}Edit Variant{% endif %}{% endblock %}
+{% block page_title %}{% if creating %}Add Variant: {{ product.sku }}{% else %}Edit Variant: {{ variant.sku }}{% endif %}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% if creating %}{% url 'product_detail' product.uuid %}{% else %}{% url 'product_detail' variant.product.uuid %}{% endif %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    <div></div>
+    <div></div>
+</div>
+<div style="max-width:500px">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">SKU *</label>
+                    {{ form.sku }}
+                    {% if form.sku.errors %}<div class="form-error">{{ form.sku.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Attributes (JSON)</label>
+                    {{ form.attributes }}
+                    <small style="color:var(--text-muted);font-size:12px;margin-top:4px;display:block">e.g. {"color": "Red", "size": "L"}</small>
+                    {% if form.attributes.errors %}<div class="form-error">{{ form.attributes.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Barcode</label>
+                    {{ form.barcode }}
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Cost Price Override</label>
+                        {{ form.cost_price_override }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Sale Price Override</label>
+                        {{ form.sale_price_override }}
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">{% if creating %}Create Variant{% else %}Save{% endif %}</button>
+                    <a href="{% if creating %}{% url 'product_detail' product.uuid %}{% else %}{% url 'product_detail' variant.product.uuid %}{% endif %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

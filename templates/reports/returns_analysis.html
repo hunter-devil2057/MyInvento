@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Returns Analysis{% endblock %}
+{% block page_title %}Returns Analysis{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+        <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
+    </div>
+</div>
+
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-rotate-left"></i></div><div class="kpi-info"><div class="kpi-label">Total Returns</div><div class="kpi-value">{{ total_returns|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Refunded</div><div class="kpi-value" style="color:var(--danger)">रू {{ total_refund|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow"><i class="fa-solid fa-clock"></i></div><div class="kpi-info"><div class="kpi-label">Pending Returns</div><div class="kpi-value">{{ pending_returns|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-percent"></i></div><div class="kpi-info"><div class="kpi-label">Return Rate</div><div class="kpi-value">{{ return_rate|nepali }}%</div></div></div>
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-flag"></i> By Status</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Status</th><th>Count</th><th>Refund</th></tr></thead>
+                <tbody>
+                    {% for s in by_status %}
+                    <tr>
+                        <td><span class="badge {% if s.status == 'Completed' %}badge-success{% elif s.status == 'Requested' %}badge-warning{% elif s.status == 'Rejected' %}badge-danger{% else %}badge-info{% endif %}">{{ s.status }}</span></td>
+                        <td>{{ s.count|nepali }}</td>
+                        <td style="font-weight:600">रू {{ s.total|default:0|floatformat:2|nepali }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-box-open"></i> By Condition</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Condition</th><th>Items</th><th>Transactions</th></tr></thead>
+                <tbody>
+                    {% for c in by_condition %}
+                    <tr>
+                        <td><span class="badge {% if c.condition == 'Sellable' %}badge-success{% else %}badge-danger{% endif %}">{{ c.condition }}</span></td>
+                        <td>{{ c.qty }}</td>
+                        <td>{{ c.count }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted" style="padding:20px">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if by_product %}
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-boxes-stacked"></i> Most Returned Products</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>#</th><th>Product</th><th>Qty Returned</th><th>Return Count</th></tr></thead>
+            <tbody>
+                {% for p in by_product %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td style="font-weight:600">{{ p.transaction_line__product__name }}</td>
+                    <td style="color:var(--danger);font-weight:700">{{ p.qty_returned|nepali }}</td>
+                    <td>{{ p.count|nepali }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if by_reason %}
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-comment"></i> Return Reasons</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Reason</th><th>Count</th></tr></thead>
+            <tbody>
+                {% for r in by_reason %}
+                <tr><td>{{ r.reason }}</td><td><span class="badge badge-info">{{ r.count|nepali }}</span></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if by_day %}
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-chart-line"></i> Returns Over Time</h3></div>
+    <div class="card-body"><canvas id="returnsChart" height="180"></canvas></div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Returns (Last 30)</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Date</th><th>TXN</th><th>Requested By</th><th>Status</th><th>Refund</th></tr></thead>
+            <tbody>
+                {% for r in returns %}
+                <tr>
+                    <td class="text-sm text-muted">{{ r.created_at|date:"d M Y" }}</td>
+                    <td style="font-weight:600">{{ r.original_transaction.invoice_number|default:"-" }}</td>
+                    <td>{{ r.requested_by|default:"-" }}</td>
+                    <td><span class="badge {% if r.status == 'Completed' %}badge-success{% elif r.status == 'Requested' %}badge-warning{% elif r.status == 'Rejected' %}badge-danger{% else %}badge-info{% endif %}">{{ r.status }}</span></td>
+                    <td style="font-weight:600">रू {{ r.refund_amount|floatformat:2|nepali }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted" style="padding:30px">No returns found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const ctx=document.getElementById('returnsChart');
+    if(ctx){new Chart(ctx,{type:'bar',data:{labels:[{% for d in by_day %}'{{ d.date }}',{% endfor %}],datasets:[{label:'Returns',data:[{% for d in by_day %}{{ d.count }},{% endfor %}],backgroundColor:'#dc2626',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
+});
+</script>
+{% endblock %}

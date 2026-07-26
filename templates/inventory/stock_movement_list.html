@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Stock Movements{% endblock %}
+{% block page_title %}Stock Movement History{% endblock %}
+{% block content %}
+<div class="flex-between mb-4">
+    <div class="flex gap-2" style="flex-wrap:wrap">
+        <a href="?type=" class="btn {% if not selected_type %}btn-primary{% else %}btn-outline{% endif %} btn-sm">All</a>
+        <a href="?type=SALE" class="btn {% if selected_type == 'SALE' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Sales</a>
+        <a href="?type=PURCHASE" class="btn {% if selected_type == 'PURCHASE' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Purchases</a>
+        <a href="?type=ADJUSTMENT" class="btn {% if selected_type == 'ADJUSTMENT' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Adjustments</a>
+        <a href="?type=TRANSFER_OUT" class="btn {% if selected_type == 'TRANSFER_OUT' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Transfer Out</a>
+        <a href="?type=TRANSFER_IN" class="btn {% if selected_type == 'TRANSFER_IN' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Transfer In</a>
+        <a href="?type=RETURN" class="btn {% if selected_type == 'RETURN' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Returns</a>
+    </div>
+    <a href="{% url 'export_csv' 'stock' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-file-csv"></i> Export CSV</a>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Product</th><th>Qty</th><th>Warehouse</th><th>User</th><th>Notes</th></tr></thead>
+            <tbody>
+                {% for m in movements %}
+                <tr>
+                    <td class="text-sm text-muted">{{ m.created_at|date:"d M Y H:i" }}</td>
+                    <td><span class="badge {% if m.movement_type == 'SALE' %}badge-danger{% elif m.movement_type == 'PURCHASE' %}badge-success{% elif m.movement_type == 'ADJUSTMENT' %}badge-warning{% elif 'TRANSFER' in m.movement_type %}badge-info{% else %}badge-secondary{% endif %}">{{ m.get_movement_type_display }}</span></td>
+                    <td style="font-weight:600">{{ m.product.name }}</td>
+                    <td style="color:{% if m.quantity_delta > 0 %}var(--success){% else %}var(--danger){% endif %};font-weight:600">{{ m.quantity_delta|floatformat:0|nepali }}</td>
+                    <td>{{ m.warehouse.name }}</td>
+                    <td class="text-sm">{{ m.user.username }}</td>
+                    <td class="text-sm text-muted truncate" style="max-width:200px">{{ m.notes }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-arrows-spin"></i></span><h3>No movements recorded</h3><p>Stock movements will appear here as you make adjustments.</p></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination movements type=selected_type %}
+{% endblock %}

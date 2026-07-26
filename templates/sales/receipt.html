@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <title>Receipt {{ transaction.invoice_number }}</title>
+    <style>
+        body{font-family:'Courier New',monospace;max-width:400px;margin:0 auto;padding:20px;color:#000}
+        .center{text-align:center}.bold{font-weight:700}.line{border-top:1px dashed #000;margin:10px 0}
+        table{width:100%}td{padding:4px 0} .right{text-align:right}
+    </style>
+</head><body>
+    <div class="center bold" style="font-size:18px">INVENTORY MANAGEMENT SYSTEM</div>
+    <div class="center text-muted" style="font-size:12px">Tax Invoice</div>
+    <div class="line"></div>
+    <div class="flex-between" style="display:flex;justify-content:space-between">
+        <div><strong>Invoice:</strong> {{ transaction.invoice_number }}</div>
+        <div>{{ transaction.completed_at|date:"d M Y H:i" }}</div>
+    </div>
+    <div><strong>Customer:</strong> {{ transaction.customer|default:"Walk-in" }}</div>
+    <div><strong>Cashier:</strong> {{ transaction.cashier|default:"-" }}</div>
+    <div class="line"></div>
+    <table>
+        <thead><tr><th>Item</th><th class="right">Qty</th><th class="right">Price</th><th class="right">Total</th></tr></thead>
+        <tbody>
+            {% for line in lines %}
+            <tr>
+                <td>{{ line.product.name|truncatechars:25 }}</td>
+                <td class="right">{{ line.quantity }}</td>
+                <td class="right">रू {{ line.unit_price|floatformat:2 }}</td>
+                <td class="right">रू {{ line.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="line"></div>
+    <div style="display:flex;justify-content:space-between"><span>Subtotal:</span><span>रू {{ transaction.subtotal|floatformat:2 }}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Tax:</span><span>रू {{ transaction.tax_total|floatformat:2 }}</span></div>
+    <div style="display:flex;justify-content:space-between"><span>Discount:</span><span>-रू {{ transaction.discount_total|floatformat:2 }}</span></div>
+    <div class="line"></div>
+    <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700"><span>TOTAL:</span><span>रू {{ transaction.grand_total|floatformat:2 }}</span></div>
+    <div class="line"></div>
+    {% for p in payments %}
+    <div style="display:flex;justify-content:space-between"><span>{{ p.method }}:</span><span>रू {{ p.amount|floatformat:2 }}</span></div>
+    {% if p.change_given %}<div style="display:flex;justify-content:space-between"><span>Change:</span><span>रू {{ p.change_given|floatformat:2 }}</span></div>{% endif %}
+    {% endfor %}
+    <div class="line"></div>
+    <div class="center" style="font-size:12px;margin-top:20px">Thank you for your purchase!</div>
+    <div class="center" style="font-size:11px;margin-top:8px"><a href="#" onclick="window.print();return false">Print Receipt</a></div>
+</body></html>

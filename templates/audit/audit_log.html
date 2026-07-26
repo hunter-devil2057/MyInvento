@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load pagination_tags %}
+{% block title %}Audit Log{% endblock %}
+{% block page_title %}Audit Log{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:center;margin-bottom:24px">
+    <form method="get" class="flex gap-2" style="flex-wrap:wrap;justify-content:center;align-items:center">
+        <input type="text" name="q" value="{{ query }}" class="form-input search-box" placeholder="Search audit logs..." style="width:280px;max-width:100%;text-align:center">
+        <select name="action" class="form-input" style="width:140px;max-width:100%" onchange="this.form.submit()">
+            <option value="">All Actions</option>
+            <option value="Create" {% if selected_action == 'Create' %}selected{% endif %}>Create</option>
+            <option value="Update" {% if selected_action == 'Update' %}selected{% endif %}>Update</option>
+            <option value="Delete" {% if selected_action == 'Delete' %}selected{% endif %}>Delete</option>
+            <option value="Login" {% if selected_action == 'Login' %}selected{% endif %}>Login</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm">Search</button>
+    </form>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Date</th><th>User</th><th>Action</th><th>Model</th><th>Object</th><th>Details</th></tr></thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="text-sm text-muted">{{ log.timestamp|date:"d M Y H:i:s" }}</td>
+                    <td>{{ log.user|default:"System" }}</td>
+                    <td><span class="badge {% if log.action == 'Create' %}badge-success{% elif log.action == 'Update' %}badge-info{% elif log.action == 'Delete' %}badge-danger{% else %}badge-secondary{% endif %}">{{ log.action }}</span></td>
+                    <td class="text-sm">{{ log.model_name }}</td>
+                    <td class="text-sm">{{ log.object_repr|truncatechars:40 }}</td>
+                    <td class="text-sm text-muted truncate" style="max-width:200px">{{ log.object_repr }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted" style="padding:30px">No audit records.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination logs q=query %}
+{% endblock %}

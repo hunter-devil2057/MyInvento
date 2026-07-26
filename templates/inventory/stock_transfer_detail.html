@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Transfer #{{ transfer.pk }}{% endblock %}
+{% block page_title %}Transfer #{{ transfer.pk }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'stock_transfer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Transfers</a>
+    <div></div>
+    <div></div>
+</div>
+<div class="card mb-6">
+    <div class="card-body">
+        <div class="grid-3">
+            <div><div class="kpi-label">From</div><div style="font-weight:600;font-size:16px">{{ transfer.source_warehouse.name }}</div></div>
+            <div><div class="kpi-label">To</div><div style="font-weight:600;font-size:16px">{{ transfer.destination_warehouse.name }}</div></div>
+            <div><div class="kpi-label">Status</div><span class="badge {% if transfer.status == 'Received' %}badge-success{% elif transfer.status == 'In Transit' %}badge-info{% else %}badge-secondary{% endif %}" style="font-size:14px;padding:6px 14px">{{ transfer.status }}</span></div>
+        </div>
+        <div class="grid-3 mt-4">
+            <div><div class="kpi-label">Requested By</div><div>{{ transfer.requested_by.username }}</div></div>
+            <div><div class="kpi-label">Date</div><div>{{ transfer.requested_at|date:"d M Y H:i" }}</div></div>
+            <div><div class="kpi-label">Received By</div><div>{{ transfer.received_by.username|default:"-" }}</div></div>
+        </div>
+    </div>
+</div>
+<div class="card mb-6">
+    <div class="card-header"><h3>Transfer Items</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Product</th><th>Quantity</th></tr></thead>
+            <tbody>
+                {% for line in lines %}
+                <tr><td style="font-weight:600">{{ line.product.name }}</td><td>{{ line.quantity|nepali }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if transfer.status == 'In Transit' %}
+<form method="post" action="{% url 'stock_transfer_receive' transfer.uuid %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success btn-lg">Mark as Received</button>
+</form>
+{% endif %}
+{% endblock %}

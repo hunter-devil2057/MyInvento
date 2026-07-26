@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Payment Methods{% endblock %}
+{% block page_title %}Payment Methods Analysis{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?days=7" class="btn btn-sm {% if days == 7 %}btn-primary{% else %}btn-outline{% endif %}">7 Days</a>
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+    </div>
+</div>
+
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Collected</div><div class="kpi-value">रू {{ total_amount|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-receipt"></i></div><div class="kpi-info"><div class="kpi-label">Total Payments</div><div class="kpi-value">{{ total_count|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-calculator"></i></div><div class="kpi-info"><div class="kpi-label">Avg Payment</div><div class="kpi-value">रू {% if total_count %}{{ total_amount|floatformat:0|nepali }}{% else %}0{% endif %}</div></div></div>
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-chart-pie"></i> Breakdown by Method</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Method</th><th>Count</th><th>Total</th><th>Average</th><th>Share</th></tr></thead>
+                <tbody>
+                    {% for m in by_method %}
+                    <tr>
+                        <td style="font-weight:600">
+                            {% if m.method == 'Cash' %}<i class="fa-solid fa-money-bill-wave" style="color:#16a34a"></i>
+                            {% elif m.method == 'Card' %}<i class="fa-solid fa-credit-card" style="color:#2563eb"></i>
+                            {% elif m.method == 'Mobile Wallet' %}<i class="fa-solid fa-mobile-screen-button" style="color:#7c3aed"></i>
+                            {% elif m.method == 'Bank Transfer' %}<i class="fa-solid fa-building-columns" style="color:#d97706"></i>
+                            {% else %}<i class="fa-solid fa-piggy-bank" style="color:#6b7280"></i>
+                            {% endif %} {{ m.method }}
+                        </td>
+                        <td>{{ m.count|nepali }}</td>
+                        <td style="font-weight:600">रू {{ m.total|floatformat:2|nepali }}</td>
+                        <td>रू {{ m.avg|floatformat:2|nepali }}</td>
+                        <td style="width:30%">
+                            <div style="background:var(--border);border-radius:4px;height:8px;width:100%">
+                                <div style="background:var(--primary);border-radius:4px;height:8px;width:{% widthratio m.total total_amount 100 %}%;min-width:2px"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted" style="padding:30px">No payment data.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-chart-bar"></i> Payment Volume</h3></div>
+        <div class="card-body"><canvas id="paymentChart" height="250"></canvas></div>
+    </div>
+</div>
+
+{% if by_status %}
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-flag"></i> Payment Status</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Status</th><th>Count</th><th>Total</th></tr></thead>
+            <tbody>
+                {% for s in by_status %}
+                <tr>
+                    <td><span class="badge {% if s.status == 'Paid' %}badge-success{% elif s.status == 'Refunded' %}badge-danger{% else %}badge-warning{% endif %}">{{ s.status }}</span></td>
+                    <td>{{ s.count|nepali }}</td>
+                    <td style="font-weight:600">रू {{ s.total|floatformat:2|nepali }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const ctx=document.getElementById('paymentChart');
+    if(ctx){new Chart(ctx,{type:'bar',data:{labels:[{% for m in by_method %}'{{ m.method }}',{% endfor %}],datasets:[{label:'Total (रू)',data:[{% for m in by_method %}{{ m.total|floatformat:0|nepali }},{% endfor %}],backgroundColor:['#16a34a','#2563eb','#7c3aed','#d97706','#6b7280'],borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
+});
+</script>
+{% endblock %}

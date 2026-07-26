@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Purchase Report{% endblock %}
+{% block page_title %}Purchase Report{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+        <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
+    </div>
+</div>
+
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Spend</div><div class="kpi-value">रू {{ total_cost|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-box-open"></i></div><div class="kpi-info"><div class="kpi-label">Items Received</div><div class="kpi-value">{{ total_items_received|default:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-file-invoice"></i></div><div class="kpi-info"><div class="kpi-label">Total POs</div><div class="kpi-value">{{ recent_pos.count|nepali }}</div></div></div>
+</div>
+
+<div class="grid-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-truck"></i> Spend by Supplier</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Supplier</th><th>POs</th><th>Total Cost</th></tr></thead>
+                <tbody>
+                    {% for s in by_supplier %}
+                    <tr>
+                        <td style="font-weight:600">{{ s.supplier__name }}</td>
+                        <td>{{ s.count|nepali }}</td>
+                        <td style="font-weight:600">रू {{ s.total_cost|default:0|floatformat:2|nepali }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted" style="padding:20px">No data</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-flag"></i> PO Status</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Status</th><th>Count</th></tr></thead>
+                <tbody>
+                    {% for s in by_status %}
+                    <tr>
+                        <td><span class="badge badge-info">{{ s.status }}</span></td>
+                        <td style="font-weight:700">{{ s.count|nepali }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% if supplier_receiving %}
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-truck-loading"></i> Receiving Efficiency</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Supplier</th><th>Ordered</th><th>Received</th><th>Fill Rate</th></tr></thead>
+            <tbody>
+                {% for s in supplier_receiving %}
+                <tr>
+                    <td style="font-weight:600">{{ s.po__supplier__name }}</td>
+                    <td>{{ s.total_ordered|default:0 }}</td>
+                    <td>{{ s.total_received|default:0 }}</td>
+                    <td>
+                        {% if s.total_ordered %}{% widthratio s.total_received s.total_ordered 100 %}%{% else %}N/A{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header"><h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Purchase Orders</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>PO #</th><th>Supplier</th><th>Date</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for po in recent_pos %}
+                <tr>
+                    <td><a href="{% url 'po_detail' po.uuid %}" style="color:var(--primary);font-weight:600;text-decoration:none">{{ po.po_number }}</a></td>
+                    <td>{{ po.supplier.name }}</td>
+                    <td class="text-sm text-muted">{{ po.order_date }}</td>
+                    <td><span class="badge badge-info">{{ po.status }}</span></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" class="text-center text-muted" style="padding:30px">No POs found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

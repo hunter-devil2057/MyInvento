@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Process Return{% endblock %}
+{% block page_title %}Process Return - {{ transaction.invoice_number }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'transaction_detail' transaction.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Transaction</a>
+    <div></div>
+    <div></div>
+</div>
+<div style="max-width:700px">
+    <div class="card">
+        <div class="card-header"><h3>Select items to return</h3></div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <table>
+                    <thead><tr><th>Product</th><th>Qty Sold</th><th>Unit Price</th><th>Return Qty</th><th>Restock?</th></tr></thead>
+                    <tbody>
+                        {% for line in transaction.lines.all %}
+                        <tr>
+                            <td style="font-weight:600">{{ line.product.name }}</td>
+                            <td>{{ line.quantity }}</td>
+                            <td>रू {{ line.unit_price|floatformat:2 }}</td>
+                            <td><input type="number" name="return_qty_{{ line.pk }}" value="0" min="0" max="{{ line.quantity }}" class="form-input" style="width:80px"></td>
+                            <td><input type="checkbox" name="restock_{{ line.pk }}" checked></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="form-group mt-4">
+                    <label class="form-label">Reason for Return</label>
+                    <textarea name="reason" class="form-input" rows="3" placeholder="Enter reason..."></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-warning">Submit Return</button>
+                    <a href="{% url 'transaction_detail' transaction.uuid %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

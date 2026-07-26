@@ -1,0 +1,13 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="section">
+<table>
+<thead><tr><th>#</th><th>Category</th><th class="text-right">Products</th><th class="text-right">Sold</th><th class="text-right">Revenue</th></tr></thead>
+<tbody>
+{% for c in categories %}
+<tr><td>{{ forloop.counter }}</td><td class="font-bold">{{ c.name }}</td><td class="text-right">{{ c.product_count }}</td><td class="text-right">{{ c.total_sold|default:0 }}</td><td class="text-right font-bold">रू {{ c.total_revenue|default:0|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

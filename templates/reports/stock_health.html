@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Stock Health{% endblock %}
+{% block page_title %}Stock Health Monitor{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon red"><i class="fa-solid fa-ban"></i></div><div class="kpi-info"><div class="kpi-label">Out of Stock</div><div class="kpi-value" style="color:var(--danger)">{{ out_of_stock|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon yellow"><i class="fa-solid fa-triangle-exclamation"></i></div><div class="kpi-info"><div class="kpi-label">Low Stock</div><div class="kpi-value" style="color:var(--warning)">{{ low_stock|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-arrow-up"></i></div><div class="kpi-info"><div class="kpi-label">Overstocked</div><div class="kpi-value">{{ overstocked|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-boxes-stacked"></i></div><div class="kpi-info"><div class="kpi-label">Stock Lines</div><div class="kpi-value">{{ total_lines|nepali }}</div></div></div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-arrow-trend-up"></i> Top Selling Products (30d)</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>#</th><th>Product</th><th>SKU</th><th>Qty Sold</th><th>Revenue</th></tr></thead>
+            <tbody>
+                {% for p in turnover_data %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td style="font-weight:600">{{ p.product__name }}</td>
+                    <td class="text-sm text-muted">{{ p.product__sku }}</td>
+                    <td><span class="badge badge-info">{{ p.sold|nepali }}</span></td>
+                    <td style="font-weight:600">रू {{ p.revenue|floatformat:2|nepali }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted" style="padding:30px">No sales data yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

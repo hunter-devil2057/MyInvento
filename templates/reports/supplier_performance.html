@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Supplier Performance{% endblock %}
+{% block page_title %}Supplier Performance{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="card mb-4">
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>#</th><th>Supplier</th><th>Contact</th><th>Lead Time</th><th>On-Time %</th><th>POs</th><th>Total Spend</th></tr></thead>
+            <tbody>
+                {% for s in suppliers %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td><a href="{% url 'supplier_detail' s.uuid %}" style="color:var(--primary);font-weight:600;text-decoration:none">{{ s.name }}</a></td>
+                    <td class="text-sm">{{ s.contact_name|default:"-" }}</td>
+                    <td>{{ s.lead_time_days }} days</td>
+                    <td><span class="badge {% if s.on_time_pct >= 90 %}badge-success{% elif s.on_time_pct >= 70 %}badge-warning{% else %}badge-danger{% endif %}">{{ s.on_time_pct|nepali }}%</span></td>
+                    <td>{{ s.po_count|nepali }}</td>
+                    <td style="font-weight:600">रू {{ s.total_spend|default:0|floatformat:0|nepali }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No suppliers.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block page_title %}{{ product.name }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'product_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Products</a>
+    <div></div>
+    <div class="flex gap-2">
+        <a href="{% url 'product_edit' product.uuid %}" class="btn btn-primary">Edit Product</a>
+        <a href="{% url 'stock_adjust_product' product.uuid %}" class="btn btn-warning">Adjust Stock</a>
+    </div>
+</div>
+
+<div class="grid-2 mb-6">
+    <div class="card">
+        <div class="card-body">
+            <div class="flex gap-4">
+                {% if product.primary_image %}
+                <img src="{{ product.primary_image.image.url }}" style="width:250px;height:180px;border-radius:12px;object-fit:cover">
+                {% elif product.image_url %}
+                <img src="{{ product.image_url }}" style="width:250px;height:180px;border-radius:12px;object-fit:cover">
+                {% else %}
+                <div style="width:250px;height:180px;border-radius:12px;font-size:40px" class="placeholder-img"><i class="fa-solid fa-star"></i></div>
+                {% endif %}
+                <div class="m-auto">
+                    <p class="text-muted">SKU: {{ product.sku }}</p>
+                    <p class="text-muted">Category: {{ product.category|default:"None" }}</p>
+                    <p class="text-muted">UOM: {{ product.unit_of_measure }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3>Pricing &amp; Stock</h3></div>
+        <div class="card-body">
+            <div class="grid-2" style="text-align:center">
+                <div><div class="kpi-label">Cost Price</div><div style="font-size:20px;font-weight:700">रू {{ product.cost_price|floatformat:2|nepali }}</div></div>
+                <div><div class="kpi-label">Sale Price</div><div style="font-size:20px;font-weight:700;color:var(--success)">रू {{ product.sale_price|floatformat:2|nepali }}</div></div>
+                <div><div class="kpi-label">Tax Class</div><div style="font-size:16px;font-weight:600">{{ product.tax_class }}</div></div>
+                <div><div class="kpi-label">Total Stock</div><div style="font-size:20px;font-weight:700">{{ total_stock|nepali }}</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs mb-6">
+    <a class="tab active" href="#stock-tab" onclick="showTab('stock')">Stock by Location</a>
+    <a class="tab" href="#variants-tab" onclick="showTab('variants')">Variants</a>
+    <a class="tab" href="#images-tab" onclick="showTab('images')">Images</a>
+    <a class="tab" href="#movements-tab" onclick="showTab('movements')">Movement History</a>
+</div>
+
+<div id="stock-tab">
+    <div class="card">
+        <div class="card-header"><h3>Stock Levels</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Warehouse</th><th>On Hand</th><th>Reserved</th><th>Available</th></tr></thead>
+                <tbody>
+                    {% for sl in stock_levels %}
+                    <tr>
+                        <td style="font-weight:600">{{ sl.warehouse.name }}</td>
+                        <td>{{ sl.quantity_on_hand|nepali }}</td>
+                        <td>{{ sl.quantity_reserved|nepali }}</td>
+                        <td><span class="badge {% if sl.available_quantity <= 0 %}badge-danger{% elif sl.available_quantity <= 10 %}badge-warning{% else %}badge-success{% endif %}">{{ sl.available_quantity|nepali }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted" style="padding:30px">No stock records</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="variants-tab" style="display:none">
+    <div class="card">
+        <div class="card-header flex-between">
+            <h3>Variants</h3>
+            <a href="{% url 'variant_create' product.uuid %}" class="btn btn-primary btn-sm">Add Variant</a>
+        </div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>SKU</th><th>Attributes</th><th>Barcode</th><th>Price Override</th><th>Actions</th></tr></thead>
+                <tbody>
+                    {% for v in variants %}
+                    <tr>
+                        <td style="font-weight:600">{{ v.sku }}</td>
+                        <td>{% for k,val in v.attributes.items %}{{ k }}: {{ val }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+                        <td>{{ v.barcode|default:"-" }}</td>
+                        <td>{% if v.sale_price_override %}रू {{ v.sale_price_override|floatformat:2|nepali }}{% else %}-{% endif %}</td>
+                        <td><a href="{% url 'variant_edit' v.uuid %}" class="btn btn-outline btn-sm">Edit</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center text-muted" style="padding:30px">No variants</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="images-tab" style="display:none">
+    <div class="card">
+        <div class="card-header flex-between">
+            <h3>Product Images</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'product_image_upload' product.uuid %}" enctype="multipart/form-data" style="display:flex;gap:12px;align-items:end;margin-bottom:20px;padding:16px;background:var(--border-light);border-radius:var(--radius-sm);border:1px dashed var(--border)">
+                {% csrf_token %}
+                <div style="flex:1">
+                    <label class="form-label" style="margin-bottom:4px;display:block">Choose Image</label>
+                    <input type="file" name="image" accept="image/*" required style="font-size:13px">
+                </div>
+                <button type="submit" class="btn btn-primary" style="white-space:nowrap"><i class="fa-solid fa-cloud-arrow-up" style="margin-right:4px"></i> Upload</button>
+            </form>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
+                {% for img in images %}
+                <div style="position:relative">
+                    <img src="{{ img.image.url }}" style="width:100%;height:150px;object-fit:cover;border-radius:8px;border:2px solid {% if img.is_primary %}var(--primary){% else %}transparent{% endif %}">
+                    {% if img.is_primary %}<span class="badge badge-primary" style="position:absolute;top:8px;left:8px">Primary</span>{% endif %}
+                </div>
+                {% empty %}
+                <p class="text-muted">No images uploaded yet. Use the form above to add one.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="movements-tab" style="display:none">
+    <div class="card">
+        <div class="card-header"><h3>Recent Stock Movements</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Date</th><th>Type</th><th>Qty</th><th>Warehouse</th><th>User</th><th>Notes</th></tr></thead>
+                <tbody>
+                    {% for m in recent_movements %}
+                    <tr>
+                        <td class="text-sm text-muted">{{ m.created_at|date:"d M Y H:i" }}</td>
+                        <td><span class="badge {% if m.movement_type == 'SALE' %}badge-danger{% elif m.movement_type == 'PURCHASE' %}badge-success{% else %}badge-info{% endif %}">{{ m.get_movement_type_display }}</span></td>
+                        <td style="font-weight:600;color:{% if m.quantity_delta > 0 %}var(--success){% else %}var(--danger){% endif %}">{{ m.quantity_delta|floatformat:0|nepali }}</td>
+                        <td>{{ m.warehouse.name }}</td>
+                        <td>{{ m.user.username }}</td>
+                        <td class="text-sm text-muted truncate" style="max-width:200px">{{ m.notes }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted" style="padding:30px">No movements recorded</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name) {
+    document.querySelectorAll('[id$="-tab"]').forEach(el => { el.style.display = 'none'; el.classList.remove('tab-content'); });
+    var target = document.getElementById(name + '-tab');
+    target.style.display = 'block';
+    target.classList.add('tab-content');
+    document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+    event.target.classList.add('active');
+    event.preventDefault();
+}
+document.addEventListener('DOMContentLoaded', function() {
+    var firstTab = document.querySelector('[id$="-tab"]');
+    if (firstTab) firstTab.classList.add('tab-content');
+});
+</script>
+{% endblock %}

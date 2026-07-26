@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    {% if editing %}
+    <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Customer</a>
+    {% else %}
+    <a href="{% url 'customer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Customers</a>
+    {% endif %}
+    <div></div>
+    <div></div>
+</div>
+<div style="max-width:600px;margin:0 auto">
+    <div class="card"><div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {% if form.errors %}
+            <div class="alert-error-inline">Please correct the errors below.</div>
+            {% endif %}
+            <div class="form-group"><label class="form-label">Name *</label>{{ form.name }}{% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}</div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Email</label>{{ form.email }}{% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}</div>
+                <div class="form-group"><label class="form-label">Phone</label>{{ form.phone }}{% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}</div>
+            </div>
+            <div class="form-group"><label class="form-label">Default Address</label>{{ form.default_address }}</div>
+            <div class="flex gap-2" style="margin-top:20px">
+                <button type="submit" class="btn btn-primary">Save</button>
+                {% if editing %}
+                <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-secondary">Cancel</a>
+                {% else %}
+                <a href="{% url 'customer_list' %}" class="btn btn-secondary">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Deactivate User{% endblock %}
+{% block page_title %}Deactivate User{% endblock %}
+{% block content %}
+<div style="max-width:500px">
+    <div class="card">
+        <div class="card-body" style="text-align:center;padding:40px">
+            <div style="font-size:48px;margin-bottom:16px"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3>Deactivate {{ target_user.username }}?</h3>
+            <p class="text-muted mt-2">This user will no longer be able to log in. Their data will be preserved.</p>
+            <form method="post" class="mt-6" style="display:flex;gap:8px;justify-content:center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, Deactivate</button>
+                <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

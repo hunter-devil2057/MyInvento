@@ -1,0 +1,31 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.transaction_list_view, name='transaction_list'),
+    path('pos/', views.pos_view, name='pos'),
+    path('pos/khalti/initiate/', views.khalti_initiate_view, name='khalti_initiate'),
+    path('pos/khalti/callback/', views.khalti_callback_view, name='khalti_callback'),
+    path('cart/api/', views.cart_api_view, name='cart_api'),
+    path('create/', views.transaction_create_view, name='transaction_create'),
+    path('<uuid:uuid>/', views.transaction_detail_view, name='transaction_detail'),
+    path('<uuid:uuid>/complete/', views.transaction_complete_view, name='transaction_complete'),
+    path('<uuid:uuid>/void/', views.transaction_void_view, name='transaction_void'),
+    path('<uuid:uuid>/receipt/', views.transaction_receipt_view, name='transaction_receipt'),
+    path('<uuid:uuid>/return/', views.return_create_view, name='return_create'),
+    path('returns/', views.return_list_view, name='return_list'),
+    path('returns/<uuid:uuid>/', views.return_detail_view, name='return_detail'),
+    path('returns/<uuid:uuid>/process/', views.return_process_view, name='return_process'),
+    path('channels/', views.channel_list_view, name='channel_list'),
+    path('channels/create/', views.channel_create_view, name='channel_create'),
+    path('channels/<uuid:uuid>/edit/', views.channel_edit_view, name='channel_edit'),
+    path('channels/<uuid:uuid>/delete/', views.channel_delete_view, name='channel_delete'),
+    path('customers/', views.customer_list_view, name='customer_list'),
+    path('customers/create/', views.customer_create_view, name='customer_create'),
+    path('customers/<uuid:uuid>/', views.customer_detail_view, name='customer_detail'),
+    path('customers/<uuid:uuid>/edit/', views.customer_edit_view, name='customer_edit'),
+    path('customers/<uuid:uuid>/delete/', views.customer_delete_view, name='customer_delete'),
+    path('cart/add/', views.cart_add_view, name='cart_add'),
+    path('cart/remove/<int:item_id>/', views.cart_remove_view, name='cart_remove'),
+    path('cart/update/<int:item_id>/', views.cart_update_view, name='cart_update'),
+]

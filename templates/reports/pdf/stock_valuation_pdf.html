@@ -1,0 +1,30 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Sale Value</div><div class="value green">रू {{ total_value|floatformat:2 }}</div></div>
+    <div class="kpi-box"><div class="label">Cost Value</div><div class="value">रू {{ total_cost|floatformat:2 }}</div></div>
+    <div class="kpi-box"><div class="label">Potential Profit</div><div class="value purple">रू {{ total_value|default:0|floatformat:2 }}</div></div>
+</div>
+<div class="section">
+<h2>Stock by Category</h2>
+<table>
+<thead><tr><th>Category</th><th class="text-right">Value</th></tr></thead>
+<tbody>
+{% for c in by_category %}
+<tr><td class="font-bold">{{ c.product__category__name|default:"Uncategorized" }}</td><td class="text-right font-bold">रू {{ c.val|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section">
+<h2>Stock Details</h2>
+<table>
+<thead><tr><th>Product</th><th>Warehouse</th><th class="text-right">Qty</th><th class="text-right">Sale Price</th><th class="text-right">Value</th></tr></thead>
+<tbody>
+{% for s in stock %}
+<tr><td class="font-bold">{{ s.product.name }}</td><td>{{ s.warehouse.name }}</td><td class="text-right">{{ s.quantity_on_hand }}</td><td class="text-right">रू {{ s.product.sale_price }}</td><td class="text-right font-bold">रू {{ s.value|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

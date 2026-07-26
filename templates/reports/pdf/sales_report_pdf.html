@@ -1,0 +1,32 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Total Sales</div><div class="value green">रू {{ total_sales|floatformat:2 }}</div></div>
+    <div class="kpi-box"><div class="label">Transactions</div><div class="value blue">{{ total_transactions }}</div></div>
+    <div class="kpi-box"><div class="label">Avg Order</div><div class="value">रू {{ avg_order|floatformat:2 }}</div></div>
+</div>
+
+<div class="section">
+<h2>Top Products</h2>
+<table>
+<thead><tr><th>#</th><th>Product</th><th class="text-right">Qty Sold</th><th class="text-right">Revenue</th></tr></thead>
+<tbody>
+{% for p in top_products %}
+<tr><td>{{ forloop.counter }}</td><td class="font-bold">{{ p.product__name }}</td><td class="text-right">{{ p.qty }}</td><td class="text-right font-bold">रू {{ p.rev|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<div class="section">
+<h2>Payment Methods</h2>
+<table>
+<thead><tr><th>Method</th><th class="text-right">Count</th><th class="text-right">Total</th></tr></thead>
+<tbody>
+{% for m in by_payment %}
+<tr><td class="font-bold">{{ m.method }}</td><td class="text-right">{{ m.count }}</td><td class="text-right font-bold">रू {{ m.total|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

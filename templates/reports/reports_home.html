@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block content %}
+
+<h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Core Reports</h3>
+<div class="grid-3 stagger-in mb-4">
+    <a href="{% url 'sales_report' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#dcfce7;color:#16a34a"><i class="fa-solid fa-money-bill-trend-up"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Sales Report</h3>
+            <p class="text-sm text-muted mt-2">Revenue, trends, top products, payment methods</p>
+        </div>
+    </a>
+    <a href="{% url 'purchase_report' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#dbeafe;color:#2563eb"><i class="fa-solid fa-file-invoice"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Purchase Report</h3>
+            <p class="text-sm text-muted mt-2">Supplier costs, receiving, PO analysis</p>
+        </div>
+    </a>
+    <a href="{% url 'stock_valuation' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#fef3c7;color:#d97706"><i class="fa-solid fa-scale-balanced"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Stock Valuation</h3>
+            <p class="text-sm text-muted mt-2">Inventory value by product and category</p>
+        </div>
+    </a>
+</div>
+
+<h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Financial Analysis</h3>
+<div class="grid-3 stagger-in mb-4">
+    <a href="{% url 'profit_loss' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#ede9fe;color:#7c3aed"><i class="fa-solid fa-chart-pie"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Profit & Loss</h3>
+            <p class="text-sm text-muted mt-2">Revenue, COGS, margins, net profit</p>
+        </div>
+    </a>
+    <a href="{% url 'payment_methods' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#fce7f3;color:#db2777"><i class="fa-solid fa-credit-card"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Payment Methods</h3>
+            <p class="text-sm text-muted mt-2">Cash, card, mobile wallet breakdown</p>
+        </div>
+    </a>
+    <a href="{% url 'returns_analysis' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#fee2e2;color:#dc2626"><i class="fa-solid fa-rotate-left"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Returns Analysis</h3>
+            <p class="text-sm text-muted mt-2">Return rates, reasons, refunds</p>
+        </div>
+    </a>
+</div>
+
+<h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Inventory & Operations</h3>
+<div class="grid-3 stagger-in mb-4">
+    <a href="{% url 'stock_health' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#dcfce7;color:#16a34a"><i class="fa-solid fa-heart-pulse"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Stock Health</h3>
+            <p class="text-sm text-muted mt-2">Stockout, low stock, overstock analysis</p>
+        </div>
+    </a>
+    <a href="{% url 'shrinkage_report' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#fef3c7;color:#d97706"><i class="fa-solid fa-magnifying-glass"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Shrinkage Report</h3>
+            <p class="text-sm text-muted mt-2">Damage, theft, and wastage tracking</p>
+        </div>
+    </a>
+    <a href="{% url 'category_analysis' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#dbeafe;color:#2563eb"><i class="fa-solid fa-folder-open"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Category Analysis</h3>
+            <p class="text-sm text-muted mt-2">Revenue by product category</p>
+        </div>
+    </a>
+</div>
+
+<h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Performance</h3>
+<div class="grid-2 stagger-in mb-4">
+    <a href="{% url 'supplier_performance' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#ede9fe;color:#7c3aed"><i class="fa-solid fa-truck"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Supplier Performance</h3>
+            <p class="text-sm text-muted mt-2">Reliability, lead times, cost analysis</p>
+        </div>
+    </a>
+    <a href="{% url 'product_performance' %}" class="card card-link" style="text-decoration:none;color:var(--text)">
+        <div class="card-body" style="text-align:center;padding:28px">
+            <div style="width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 12px;background:#fce7f3;color:#db2777"><i class="fa-solid fa-chart-line"></i></div>
+            <h3 style="font-size:16px;font-weight:700">Product Performance</h3>
+            <p class="text-sm text-muted mt-2">Sales velocity and profitability</p>
+        </div>
+    </a>
+</div>
+
+<h3 style="font-size:18px;font-weight:700;margin-bottom:16px">Export Data</h3>
+<div class="card stagger-in">
+    <div class="card-body">
+        <div class="flex gap-2" style="flex-wrap:wrap">
+            <a href="{% url 'export_csv' 'stock' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Stock</a>
+            <a href="{% url 'export_csv' 'sales' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Sales</a>
+            <a href="{% url 'export_csv' 'purchases' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Purchases</a>
+            <a href="{% url 'export_csv' 'transactions' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Transactions</a>
+            <a href="{% url 'export_csv' 'customers' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Customers</a>
+            <a href="{% url 'export_csv' 'profit_loss' %}" class="btn btn-outline"><i class="fa-solid fa-file-csv"></i> Profit & Loss</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

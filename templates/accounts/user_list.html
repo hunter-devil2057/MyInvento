@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load pagination_tags %}
+{% block title %}Users{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block content %}
+<style>
+    .um-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px; }
+    .um-stats { display:flex; gap:10px; flex-wrap:wrap; }
+    .um-stat { display:flex; align-items:center; gap:8px; padding:8px 16px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; font-size:13px; font-weight:600; }
+    .um-stat i { font-size:14px; }
+    .um-stat strong { font-size:17px; }
+    .um-bulk-bar { display:none; align-items:center; gap:12px; padding:12px 20px; background:linear-gradient(135deg,var(--primary),#7c3aed); border-radius:12px; margin-bottom:16px; color:#fff; font-size:13px; }
+    .um-bulk-bar.active { display:flex; }
+    .um-bulk-bar select { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); color:#fff; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:600; }
+    .um-bulk-bar select option { color:#000; background:#fff; }
+    .um-table-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+    .um-table { width:100%; border-collapse:collapse; }
+    .um-table th { padding:14px 16px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); text-align:left; border-bottom:1px solid var(--border); background:var(--card-bg); position:sticky; top:0; }
+    .um-table td { padding:12px 16px; border-bottom:1px solid var(--border-light); font-size:13px; vertical-align:middle; }
+    .um-table tr:last-child td { border-bottom:none; }
+    .um-table tr:hover td { background:rgba(99,102,241,.03); }
+    .um-user-cell { display:flex; align-items:center; gap:12px; }
+    .um-avatar { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px; color:#fff; flex-shrink:0; }
+    .um-avatar.admin { background:linear-gradient(135deg,#6366f1,#818cf8); }
+    .um-avatar.warehouse { background:linear-gradient(135deg,#8b5cf6,#a855f7); }
+    .um-avatar.sales { background:linear-gradient(135deg,#10b981,#06b6d4); }
+    .um-avatar.purchasing { background:linear-gradient(135deg,#f59e0b,#f97316); }
+    .um-avatar.auditor { background:linear-gradient(135deg,#06b6d4,#22d3ee); }
+    .um-avatar.customer { background:linear-gradient(135deg,#f97316,#fb923c); }
+    .um-avatar.default { background:linear-gradient(135deg,#64748b,#475569); }
+    .um-name { font-weight:700; font-size:14px; }
+    .um-email { font-size:12px; color:var(--text-muted); }
+    .um-role-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:8px; font-size:11px; font-weight:700; white-space:nowrap; }
+    .um-role-badge.admin { background:rgba(99,102,241,.1); color:#6366f1; }
+    .um-role-badge.warehouse { background:rgba(139,92,246,.1); color:#8b5cf6; }
+    .um-role-badge.sales { background:rgba(16,185,129,.1); color:#10b981; }
+    .um-role-badge.purchasing { background:rgba(245,158,11,.1); color:#f59e0b; }
+    .um-role-badge.auditor { background:rgba(6,182,212,.1); color:#06b6d4; }
+    .um-role-badge.customer { background:rgba(249,115,22,.1); color:#f97316; }
+    .um-status { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+    .um-status.active { background:rgba(16,185,129,.1); color:#10b981; }
+    .um-status.inactive { background:rgba(239,68,68,.1); color:#ef4444; }
+    .um-status::before { content:''; width:6px; height:6px; border-radius:50%; background:currentColor; }
+    .um-actions { display:flex; gap:4px; }
+    .um-actions .btn { padding:5px 10px; font-size:11px; border-radius:6px; }
+    .um-check { width:16px; height:16px; accent-color:var(--primary); cursor:pointer; }
+    .um-empty { text-align:center; padding:60px 20px; grid-column:1/-1; }
+    @media(max-width:768px) {
+        .um-table-wrap { overflow-x:auto; }
+        .um-table { min-width:700px; }
+    }
+</style>
+
+<form method="get" style="display:flex;justify-content:center;margin-bottom:20px">
+    <div class="search-box" style="width:100%;max-width:420px;display:flex;gap:8px">
+        <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search by name, email, or username..." style="flex:1;text-align:center">
+        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-search"></i></button>
+    </div>
+</form>
+
+<div class="um-toolbar">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <a href="{% url 'admin_panel' %}" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Admin Panel</a>
+        <a href="{% url 'register' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add User</a>
+    </div>
+    <div class="um-stats">
+        <div class="um-stat"><i class="fa-solid fa-users" style="color:var(--primary)"></i> <strong>{{ users.paginator.count }}</strong> Users</div>
+        {% if active_count is not None %}
+        <div class="um-stat"><i class="fa-solid fa-user-check" style="color:#10b981"></i> <strong>{{ active_count }}</strong> Active</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Bulk Actions Bar -->
+<div class="um-bulk-bar" id="bulkBar">
+    <span><i class="fa-solid fa-check-double"></i> <strong id="selectedCount">0</strong> selected</span>
+    <div style="display:flex;gap:6px;margin-left:auto;align-items:center;flex-wrap:wrap">
+        <select id="bulkRoleSelect" style="display:none">
+            <option value="">-- Select Role --</option>
+            <option value="admin">Admin</option>
+            <option value="warehouse">Warehouse</option>
+            <option value="sales">Sales</option>
+            <option value="purchasing">Purchasing</option>
+            <option value="auditor">Auditor</option>
+            <option value="customer">Customer</option>
+        </select>
+        <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="bulkSubmit('bulk_activate')">
+            <i class="fa-solid fa-circle-check"></i> Activate
+        </button>
+        <button type="button" class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="bulkSubmit('bulk_deactivate')">
+            <i class="fa-solid fa-ban"></i> Deactivate
+        </button>
+        <button type="button" class="btn btn-sm" id="bulkRoleBtn" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3)" onclick="showBulkRole()">
+            <i class="fa-solid fa-shield-halved"></i> Change Role
+        </button>
+        <button type="button" class="btn btn-sm" style="background:rgba(239,68,68,.8);color:#fff;border:none" onclick="bulkSubmit('bulk_delete')">
+            <i class="fa-solid fa-trash-can"></i> Delete
+        </button>
+    </div>
+</div>
+
+<form method="post" action="{% url 'user_bulk_action' %}" id="bulkForm">
+    {% csrf_token %}
+    <input type="hidden" name="bulk_action" id="bulkAction">
+    <input type="hidden" name="bulk_role_value" id="bulkRoleValue">
+</form>
+
+<div class="um-table-wrap">
+    <table class="um-table">
+        <thead>
+            <tr>
+                <th style="width:40px"><input type="checkbox" class="um-check" id="selectAll" onclick="toggleAll(this)"></th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Logins</th>
+                <th>Joined</th>
+                <th style="text-align:right">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in users %}
+            <tr>
+                <td><input type="checkbox" class="um-check user-check" value="{{ u.pk }}" onchange="updateBulk()"></td>
+                <td>
+                    <div class="um-user-cell">
+                        <div class="um-avatar {% if u.profile %}{{ u.profile.role }}{% else %}default{% endif %}">
+                            {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
+                        </div>
+                        <div>
+                            <div class="um-name">{{ u.get_full_name|default:u.username }}</div>
+                            <div class="um-email">{{ u.email|default:"No email" }} &middot; @{{ u.username }}</div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    {% if u.profile %}
+                    <span class="um-role-badge {{ u.profile.role }}">
+                        <i class="{{ u.profile.role_icon }}"></i>
+                        {{ u.profile.get_role_display }}
+                    </span>
+                    {% else %}
+                    <span class="um-role-badge sales"><i class="fa-solid fa-user"></i> Staff</span>
+                    {% endif %}
+                    {% if u.is_superuser %}
+                    <span style="display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;background:rgba(245,158,11,.1);color:#f59e0b;margin-left:4px"><i class="fa-solid fa-crown"></i> Super</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <span class="um-status {% if u.is_active %}active{% else %}inactive{% endif %}">
+                        {% if u.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <span class="login-count" data-pk="{{ u.pk }}" style="font-size:13px;font-weight:700">0</span>
+                </td>
+                <td class="text-muted" style="font-size:12px">{{ u.date_joined|date:"d M Y" }}</td>
+                <td>
+                    <div class="um-actions" style="justify-content:flex-end">
+                        <a href="{% url 'user_detail' u.pk %}" class="btn btn-outline btn-sm" title="View"><i class="fa-solid fa-eye"></i></a>
+                        <a href="{% url 'user_edit' u.pk %}" class="btn btn-outline btn-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                        {% if u.is_superuser %}
+                        <span class="btn btn-sm" style="opacity:.3;cursor:not-allowed;color:#f59e0b;border:1px solid rgba(245,158,11,.3);background:transparent" title="Main admin - protected"><i class="fa-solid fa-shield-halved"></i></span>
+                        {% else %}
+                        {% if u.is_active %}
+                        <form method="post" action="{% url 'user_deactivate' u.pk %}" style="display:inline" onsubmit="return confirm('Deactivate {{ u.username }}? They will not be able to log in.')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm" style="color:#f59e0b;border:1px solid rgba(245,158,11,.3);background:transparent" title="Deactivate"><i class="fa-solid fa-user-lock"></i></button>
+                        </form>
+                        {% else %}
+                        <form method="post" action="{% url 'user_activate' u.pk %}" style="display:inline" onsubmit="return confirm('Activate {{ u.username }}? They will be able to log in again.')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm" style="color:#10b981;border:1px solid rgba(16,185,129,.3);background:transparent" title="Activate"><i class="fa-solid fa-user-check"></i></button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'user_delete' u.pk %}" style="display:inline" onsubmit="return confirm('Permanently delete {{ u.username }}? This cannot be undone.')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm" style="color:var(--danger);border:1px solid var(--danger);background:transparent" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7">
+                    <div class="um-empty">
+                        <div style="font-size:48px;opacity:.2;margin-bottom:12px"><i class="fa-solid fa-users-slash"></i></div>
+                        <h3 style="font-size:18px;font-weight:700;margin-bottom:6px">No users found</h3>
+                        <p style="color:var(--text-muted);font-size:14px">Try a different search or add a new user.</p>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="margin-top:20px">
+    {% smart_pagination users q=query %}
+</div>
+
+<script>
+var loginCounts = {{ login_counts_json|safe }};
+document.querySelectorAll('.login-count').forEach(function(el) {
+    var pk = el.getAttribute('data-pk');
+    var count = loginCounts[pk] || 0;
+    el.textContent = count;
+    if (count > 0) el.style.color = '#10b981';
+    else el.style.color = 'var(--text-muted)';
+});
+function toggleAll(el) {
+    document.querySelectorAll('.user-check').forEach(cb => { cb.checked = el.checked; });
+    updateBulk();
+}
+function updateBulk() {
+    const checked = document.querySelectorAll('.user-check:checked');
+    const bar = document.getElementById('bulkBar');
+    document.getElementById('selectedCount').textContent = checked.length;
+    bar.classList.toggle('active', checked.length > 0);
+}
+function showBulkRole() {
+    const sel = document.getElementById('bulkRoleSelect');
+    sel.style.display = sel.style.display === 'none' ? 'inline-block' : 'none';
+    sel.focus();
+    sel.onchange = function() {
+        if (this.value) bulkSubmit('bulk_role', this.value);
+    };
+}
+function bulkSubmit(action, roleVal) {
+    const ids = [];
+    document.querySelectorAll('.user-check:checked').forEach(cb => ids.push(cb.value));
+    if (!ids.length) return alert('No users selected.');
+    if (action === 'bulk_delete' && !confirm('Permanently delete ' + ids.length + ' user(s)? This cannot be undone.')) return;
+    if (action === 'bulk_deactivate' && !confirm('Deactivate ' + ids.length + ' user(s)? They will not be able to log in.')) return;
+    if (action === 'bulk_activate' && !confirm('Activate ' + ids.length + ' user(s)? They will be able to log in.')) return;
+    if (action === 'bulk_role' && !roleVal) { showBulkRole(); return; }
+    if (action === 'bulk_role' && !confirm('Change role of ' + ids.length + ' user(s) to ' + roleVal + '?')) return;
+    const form = document.getElementById('bulkForm');
+    document.getElementById('bulkAction').value = action;
+    document.getElementById('bulkRoleValue').value = roleVal || '';
+    ids.forEach(id => {
+        const inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'selected_users';
+        inp.value = id;
+        form.appendChild(inp);
+    });
+    form.submit();
+}
+</script>
+{% endblock %}

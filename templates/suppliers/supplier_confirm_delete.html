@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Deactivate Supplier{% endblock %}
+{% block page_title %}Deactivate Supplier{% endblock %}
+{% block content %}
+<div style="max-width:500px"><div class="card"><div class="card-body" style="text-align:center;padding:40px">
+    <h3>Deactivate "{{ supplier.name }}"?</h3>
+    <p class="text-muted mt-2">They will be hidden from active listings.</p>
+    <form method="post" class="mt-6" style="display:flex;gap:8px;justify-content:center">
+        {% csrf_token %}<button type="submit" class="btn btn-danger">Deactivate</button>
+        <a href="{% url 'supplier_detail' supplier.uuid %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div></div></div>
+{% endblock %}

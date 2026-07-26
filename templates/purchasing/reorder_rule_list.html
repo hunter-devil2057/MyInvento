@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load pagination_tags %}
+{% block title %}Reorder Rules{% endblock %}
+{% block page_title %}Reorder Rules{% endblock %}
+{% block content %}
+<div class="flex-between mb-4"><div></div><a href="{% url 'reorder_rule_create' %}" class="btn btn-primary">+ Add Rule</a></div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Product</th><th>Warehouse</th><th>Min</th><th>Max</th><th>Supplier</th><th>Active</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for r in rules %}
+                <tr>
+                    <td style="font-weight:600">{{ r.product.name }}</td>
+                    <td>{{ r.warehouse|default:"All" }}</td>
+                    <td>{{ r.min_quantity }}</td>
+                    <td>{{ r.max_quantity }}</td>
+                    <td>{{ r.default_supplier.name }}</td>
+                    <td>{% if r.is_active %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-secondary">No</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'reorder_rule_edit' r.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                        <form method="post" action="{% url 'reorder_rule_delete' r.uuid %}" style="display:inline" onsubmit="return confirm('Delete this rule?')">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No reorder rules configured.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination rules %}
+{% endblock %}

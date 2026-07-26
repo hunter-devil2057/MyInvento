@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Delete Variant{% endblock %}
+{% block page_title %}Delete Variant{% endblock %}
+{% block content %}
+<div style="max-width:500px">
+    <div class="card">
+        <div class="card-body" style="text-align:center;padding:40px">
+            <h3>Delete variant {{ variant.sku }}?</h3>
+            <form method="post" class="mt-6" style="display:flex;gap:8px;justify-content:center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+                <a href="{% url 'product_detail' variant.product.uuid %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

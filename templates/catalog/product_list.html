@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Products{% endblock %}
+{% block page_title %}Product Catalog{% endblock %}
+{% block content %}
+<form method="get" style="margin-bottom:24px">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+        <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search products..." style="width:240px;text-align:center">
+        <select name="category" class="form-input" style="width:180px" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.pk }}" {% if selected_category == cat.pk|stringformat:"d" %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="status" class="form-input" style="width:150px" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Archived</option>
+        </select>
+    </div>
+</form>
+<div class="flex-between mb-4">
+    <p class="text-muted" style="font-size:13px">{{ products.paginator.count }} product{{ products.paginator.count|pluralize }}</p>
+    <a href="{% url 'product_create' %}" class="btn btn-primary">+ Add Product</a>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr><th>Image</th><th>Product</th><th>SKU</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>
+                        {% if p.primary_image %}
+                        <img src="{{ p.primary_image.image.url }}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">
+                        {% elif p.image_url %}
+                        <img src="{{ p.image_url }}" style="width:48px;height:48px;border-radius:8px;object-fit:cover">
+                        {% else %}
+                        <div style="width:48px;height:48px;border-radius:8px;font-size:20px" class="placeholder-img"><i class="fa-solid fa-star"></i></div>
+                        {% endif %}
+                    </td>
+                    <td><a href="{% url 'product_detail' p.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ p.name }}</a></td>
+                    <td class="text-muted text-sm">{{ p.sku }}</td>
+                    <td>{{ p.category|default:"-" }}</td>
+                    <td style="font-weight:600">रू {{ p.sale_price|floatformat:2|nepali }}</td>
+                    <td>
+                        {% with stock=p.total_stock %}
+                        <span class="badge {% if stock <= 0 %}badge-danger{% elif stock <= 10 %}badge-warning{% else %}badge-success{% endif %}">{{ stock|nepali }}</span>
+                        {% endwith %}
+                    </td>
+                    <td>{% if p.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Archived</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'product_edit' p.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-boxes-stacked"></i></span><h3>No products found</h3><p>{% if query or selected_category or selected_status %}Try adjusting your filters.{% else %}Create your first product to start tracking inventory.{% endif %}</p><a href="{% url 'product_create' %}" class="btn btn-primary mt-2">+ Add Product</a></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination products q=query category=selected_category status=selected_status %}
+{% endblock %}

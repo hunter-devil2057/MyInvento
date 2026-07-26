@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Category Analysis{% endblock %}
+{% block page_title %}Category Analysis{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+        <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
+    </div>
+</div>
+
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Revenue ({{ days }}d)</div><div class="kpi-value">रू {{ total_revenue|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-folder-open"></i></div><div class="kpi-info"><div class="kpi-label">Active Categories</div><div class="kpi-value">{{ categories.count|nepali }}</div></div></div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>#</th><th>Category</th><th>Products</th><th>Stock</th><th>Sold</th><th>Revenue</th><th>Share</th></tr></thead>
+            <tbody>
+                {% for c in categories %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td style="font-weight:700">{{ c.name }}</td>
+                    <td>{{ c.product_count|nepali }}</td>
+                    <td>{{ c.stock_qty|default:0|nepali }}</td>
+                    <td>{{ c.total_sold|default:0|nepali }}</td>
+                    <td style="font-weight:600">रू {{ c.total_revenue|default:0|floatformat:2|nepali }}</td>
+                    <td style="width:20%">
+                        <div style="background:var(--border);border-radius:4px;height:8px;width:100%">
+                            <div style="background:var(--primary);border-radius:4px;height:8px;width:{% widthratio c.total_revenue total_revenue 100 %}%;min-width:2px"></div>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No categories found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header"><h3><i class="fa-solid fa-chart-pie"></i> Revenue Distribution</h3></div>
+    <div class="card-body"><canvas id="categoryChart" height="250"></canvas></div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const ctx=document.getElementById('categoryChart');
+    if(ctx){
+        const colors=['#2563eb','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#be123c','#65a30d','#c2410c','#6366f1'];
+        new Chart(ctx,{type:'doughnut',data:{labels:[{% for c in categories %}'{{ c.name|default:"Uncategorized" }}',{% endfor %}],datasets:[{data:[{% for c in categories %}{{ c.total_revenue|default:0|floatformat:0|nepali }},{% endfor %}],backgroundColor:colors}]},options:{responsive:true,plugins:{legend:{position:'right'}}}});
+    }
+});
+</script>
+{% endblock %}

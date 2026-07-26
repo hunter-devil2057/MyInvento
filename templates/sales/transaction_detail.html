@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Transaction {{ transaction.invoice_number|default:"Draft" }}{% endblock %}
+{% block page_title %}Transaction {{ transaction.invoice_number|default:"Draft" }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'transaction_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Transactions</a>
+    <div></div>
+    <div class="flex gap-2">
+        {% if transaction.status == 'Completed' %}
+        <a href="{% url 'transaction_receipt' transaction.uuid %}" class="btn btn-outline" target="_blank">View Receipt</a>
+        <a href="{% url 'return_create' transaction.uuid %}" class="btn btn-warning">Process Return</a>
+        {% endif %}
+        {% if transaction.status == 'Draft' %}
+        <a href="{% url 'pos' %}" class="btn btn-primary">Continue Editing</a>
+        {% endif %}
+    </div>
+</div>
+<div class="grid-3 mb-6">
+    <div class="card"><div class="card-body">
+        <div class="kpi-label">Customer</div><div style="font-weight:600">{{ transaction.customer|default:"Walk-in" }}</div>
+        <div class="text-sm text-muted mt-2">Channel: {{ transaction.channel }}</div>
+    </div></div>
+    <div class="card"><div class="card-body">
+        <div class="kpi-label">Cashier</div><div style="font-weight:600">{{ transaction.cashier|default:"System" }}</div>
+        <div class="text-sm text-muted mt-2">Warehouse: {{ transaction.warehouse }}</div>
+    </div></div>
+    <div class="card"><div class="card-body">
+        <div class="kpi-label">Grand Total</div><div style="font-size:28px;font-weight:800;color:var(--primary)">रू {{ transaction.grand_total|floatformat:2|nepali }}</div>
+    </div></div>
+</div>
+<div class="card mb-6">
+    <div class="card-header"><h3>Line Items</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Tax</th><th>Subtotal</th></tr></thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td style="font-weight:600">{{ line.product.name }}{% if line.variant %} ({{ line.variant }}){% endif %}</td>
+                    <td>{{ line.quantity|nepali }}</td>
+                    <td>रू {{ line.unit_price|floatformat:2|nepali }}</td>
+                    <td>रू {{ line.discount|floatformat:2|nepali }}</td>
+                    <td>रू {{ line.tax|floatformat:2|nepali }}</td>
+                    <td style="font-weight:600">रू {{ line.subtotal|floatformat:2|nepali }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if payments %}
+<div class="card mb-6">
+    <div class="card-header"><h3>Payments</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Method</th><th>Amount</th><th>Tendered</th><th>Change</th><th>Status</th></tr></thead>
+            <tbody>
+                {% for p in payments %}
+                <tr>
+                    <td>{{ p.method }}</td>
+                    <td style="font-weight:600">रू {{ p.amount|floatformat:2|nepali }}</td>
+                    <td>रू {{ p.amount_tendered|floatformat:2|nepali|default:"-" }}</td>
+                    <td>रू {{ p.change_given|floatformat:2|nepali|default:"-" }}</td>
+                    <td><span class="badge badge-success">{{ p.status }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% if returns %}
+<div class="card">
+    <div class="card-header"><h3>Returns</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Return #</th><th>Status</th><th>Refund</th><th>Date</th></tr></thead>
+            <tbody>
+                {% for r in returns %}
+                <tr>
+                    <td><a href="{% url 'return_detail' r.uuid %}" style="color:var(--primary);font-weight:600;text-decoration:none">#{{ r.pk }}</a></td>
+                    <td><span class="badge {% if r.status == 'Completed' %}badge-success{% elif r.status == 'Requested' %}badge-warning{% else %}badge-secondary{% endif %}">{{ r.status }}</span></td>
+                    <td>रू {{ r.refund_amount|floatformat:2|nepali }}</td>
+                    <td class="text-sm text-muted">{{ r.created_at|date:"d M Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

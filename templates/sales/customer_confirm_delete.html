@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Delete Customer{% endblock %}
+{% block page_title %}Delete Customer{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:0 auto;width:100%">
+    <div class="card" style="border-color:var(--danger)">
+        <div class="card-body" style="text-align:center;padding:40px">
+            <div style="width:64px;height:64px;border-radius:50%;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;color:var(--danger)">
+                <i class="fa-solid fa-user-minus"></i>
+            </div>
+            <h3 style="font-size:20px;font-weight:800;margin-bottom:8px">Delete Customer?</h3>
+            <p style="color:var(--text-muted);font-size:14px;margin-bottom:4px">
+                You are about to permanently delete <strong>{{ customer.name }}</strong>.
+            </p>
+            <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:10px;padding:14px;margin:16px 0;text-align:left">
+                <div style="font-size:13px;font-weight:700;color:var(--danger);margin-bottom:8px"><i class="fa-solid fa-circle-exclamation"></i> This will:</div>
+                <ul style="margin:0;padding-left:18px;font-size:12px;color:var(--text-muted);line-height:1.8">
+                    <li>Remove the customer record permanently</li>
+                    <li>Past transactions will be preserved (unlinked)</li>
+                    <li>Customer address history will be deleted</li>
+                </ul>
+            </div>
+            {% if customer.user %}
+            <div style="background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.2);border-radius:10px;padding:12px;margin-bottom:16px;text-align:left">
+                <div style="font-size:12px;color:var(--info);font-weight:600"><i class="fa-solid fa-link"></i> Linked to user account: {{ customer.user.username }}</div>
+            </div>
+            {% endif %}
+            <form method="post" action="{% url 'customer_delete' customer.uuid %}" style="display:flex;gap:8px;justify-content:center;margin-top:20px">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger" onclick="return confirm('PERMANENTLY delete {{ customer.name }}?')">
+                    <i class="fa-solid fa-trash-can"></i> Delete Customer
+                </button>
+                <a href="{% url 'customer_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

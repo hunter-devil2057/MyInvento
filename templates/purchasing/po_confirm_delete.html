@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete Purchase Order{% endblock %}
+{% block page_title %}Delete Purchase Order{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:0 auto">
+    <div class="card">
+        <div class="card-body" style="text-align:center">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:48px;color:var(--danger);margin-bottom:16px"></i>
+            <h3 style="margin-bottom:8px">Delete "{{ po.po_number }}"?</h3>
+            <p style="color:var(--text-muted);margin-bottom:24px">This action cannot be undone. The purchase order and all its lines will be permanently removed.</p>
+            <div class="flex gap-2" style="justify-content:center">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete PO</button>
+                </form>
+                <a href="{% url 'po_detail' po.uuid %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

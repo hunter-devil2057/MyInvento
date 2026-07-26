@@ -1,0 +1,29 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Total Spend</div><div class="value">रू {{ total_cost|floatformat:2 }}</div></div>
+    <div class="kpi-box"><div class="label">Items Received</div><div class="value blue">{{ total_items }}</div></div>
+</div>
+<div class="section">
+<h2>Spend by Supplier</h2>
+<table>
+<thead><tr><th>Supplier</th><th class="text-right">POs</th><th class="text-right">Total Cost</th></tr></thead>
+<tbody>
+{% for s in by_supplier %}
+<tr><td class="font-bold">{{ s.supplier__name }}</td><td class="text-right">{{ s.count }}</td><td class="text-right font-bold">रू {{ s.total|default:0|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section">
+<h2>Purchase Orders</h2>
+<table>
+<thead><tr><th>PO #</th><th>Supplier</th><th>Date</th><th>Status</th></tr></thead>
+<tbody>
+{% for po in pos %}
+<tr><td class="font-bold">{{ po.po_number }}</td><td>{{ po.supplier.name }}</td><td>{{ po.order_date }}</td><td><span class="badge badge-blue">{{ po.status }}</span></td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

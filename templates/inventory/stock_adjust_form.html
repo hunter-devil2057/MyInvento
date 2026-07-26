@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Adjust Stock: {{ product.name }}{% endblock %}
+{% block page_title %}Adjust Stock: {{ product.name }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'stock_adjust' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Stock Adjust</a>
+    <div></div>
+    <div></div>
+</div>
+<div style="max-width:600px;margin:0 auto">
+    <div class="card">
+        <div class="card-header"><h3>Stock Adjustment</h3></div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Warehouse *</label>
+                    <select name="warehouse" class="form-input" required>
+                        <option value="">Select warehouse...</option>
+                        {% for w in warehouses %}
+                        <option value="{{ w.pk }}">{{ w.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% if product.variants.exists %}
+                <div class="form-group">
+                    <label class="form-label">Variant (optional)</label>
+                    <select name="variant" class="form-input">
+                        <option value="">Base product (no variant)</option>
+                        {% for v in product.variants.all %}
+                        <option value="{{ v.pk }}">{{ v.sku }} - {{ v.attributes }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+                <div class="form-group">
+                    <label class="form-label">Quantity Change (+ to add, - to remove) *</label>
+                    <input type="number" name="quantity_delta" class="form-input" required placeholder="e.g. 10 or -5">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason Code *</label>
+                    <select name="reason_code" class="form-input" required>
+                        <option value="">Select reason...</option>
+                        {% for rc in reason_codes %}
+                        <option value="{{ rc.pk }}">{{ rc.label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea name="note" class="form-input" rows="3" placeholder="Optional notes..."></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-warning">Apply Adjustment</button>
+                    <a href="{% url 'stock_overview' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

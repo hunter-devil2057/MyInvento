@@ -1,0 +1,39 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Total Shrinkage</div><div class="value red">{{ total_shrinkage }}</div></div>
+</div>
+<div class="section">
+<h2>By Reason</h2>
+<table>
+<thead><tr><th>Reason</th><th class="text-right">Units Lost</th></tr></thead>
+<tbody>
+{% for r in by_reason %}
+<tr><td class="font-bold">{{ r.reason_code__label|default:r.reason_code__code }}</td><td class="text-right text-red">{{ r.t }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section">
+<h2>By Product</h2>
+<table>
+<thead><tr><th>Product</th><th class="text-right">Qty Lost</th></tr></thead>
+<tbody>
+{% for p in by_product %}
+<tr><td class="font-bold">{{ p.product__name }}</td><td class="text-right text-red">{{ p.t }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section">
+<h2>Details</h2>
+<table>
+<thead><tr><th>Date</th><th>Product</th><th>Qty</th><th>Reason</th><th>User</th></tr></thead>
+<tbody>
+{% for m in movements %}
+<tr><td>{{ m.created_at|date:"d M Y" }}</td><td class="font-bold">{{ m.product.name }}</td><td class="text-red">{{ m.quantity_delta }}</td><td>{{ m.reason_code|default:"-" }}</td><td>{{ m.user.username|default:"-" }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

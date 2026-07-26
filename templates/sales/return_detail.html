@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Return #{{ return_request.pk }}{% endblock %}
+{% block page_title %}Return #{{ return_request.pk }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'return_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Returns</a>
+    <div></div>
+    <div></div>
+</div>
+<div class="card mb-6">
+    <div class="card-body">
+        <div class="grid-3">
+            <div><div class="kpi-label">Invoice</div><a href="{% url 'transaction_detail' return_request.original_transaction.uuid %}" style="color:var(--primary);font-weight:600">{{ return_request.original_transaction.invoice_number }}</a></div>
+            <div><div class="kpi-label">Status</div><span class="badge {% if return_request.status == 'Completed' %}badge-success{% elif return_request.status == 'Requested' %}badge-warning{% else %}badge-secondary{% endif %}">{{ return_request.status }}</span></div>
+            <div><div class="kpi-label">Refund Amount</div><div style="font-size:20px;font-weight:700;color:var(--primary)">रू {{ return_request.refund_amount|floatformat:2 }}</div></div>
+        </div>
+    </div>
+</div>
+<div class="card mb-6">
+    <div class="card-header"><h3>Returned Items</h3></div>
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>Product</th><th>Qty Returned</th><th>Restock</th><th>Condition</th></tr></thead>
+            <tbody>
+                {% for line in lines %}
+                <tr>
+                    <td style="font-weight:600">{{ line.transaction_line.product.name }}</td>
+                    <td>{{ line.quantity_returned }}</td>
+                    <td>{% if line.restock %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-secondary">No</span>{% endif %}</td>
+                    <td>{{ line.condition }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% if return_request.status == 'Requested' %}
+<div class="flex gap-2">
+    <form method="post" action="{% url 'return_process' return_request.uuid %}" onsubmit="return confirm('Approve this return and process the refund?')">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="approve">
+        <select name="refund_method" class="form-input" style="display:inline-block;width:auto;margin-right:8px">
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="Store Credit">Store Credit</option>
+        </select>
+        <button type="submit" class="btn btn-success">Approve & Process Refund</button>
+    </form>
+    <form method="post" action="{% url 'return_process' return_request.uuid %}" onsubmit="return confirm('Reject this return? This action cannot be undone.')">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reject">
+        <button type="submit" class="btn btn-danger">Reject Return</button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

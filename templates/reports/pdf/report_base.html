@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{{ title|default:"Report" }}</title>
+    <style>
+        @page { size: A4; margin: 20mm 15mm; }
+        body { font-family: Helvetica, Arial, sans-serif; font-size: 11px; color: #1a1a1a; line-height: 1.5; }
+        h1 { font-size: 22px; color: #1a1a1a; margin: 0 0 5px 0; font-weight: 800; }
+        h2 { font-size: 16px; color: #374151; margin: 20px 0 8px 0; font-weight: 700; border-bottom: 2px solid #e5e7eb; padding-bottom: 4px; }
+        h3 { font-size: 13px; color: #6b7280; margin: 0 0 12px 0; font-weight: 400; }
+        .header { margin-bottom: 20px; border-bottom: 3px solid #2563eb; padding-bottom: 10px; }
+        .header .meta { font-size: 10px; color: #6b7280; margin-top: 4px; }
+        .kpi-row { display: flex; gap: 10px; margin-bottom: 16px; }
+        .kpi-box { flex: 1; border: 1px solid #e5e7eb; border-radius: 6px; padding: 10px; text-align: center; }
+        .kpi-box .label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-box .value { font-size: 18px; font-weight: 800; color: #1a1a1a; margin-top: 2px; }
+        .kpi-box .value.green { color: #16a34a; }
+        .kpi-box .value.red { color: #dc2626; }
+        .kpi-box .value.blue { color: #2563eb; }
+        .kpi-box .value.purple { color: #7c3aed; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+        th { background: #f3f4f6; font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #374151; font-weight: 700; text-align: left; padding: 6px 8px; border-bottom: 2px solid #d1d5db; }
+        td { padding: 5px 8px; border-bottom: 1px solid #e5e7eb; font-size: 10px; }
+        tr:nth-child(even) { background: #fafafa; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-bold { font-weight: 700; }
+        .text-green { color: #16a34a; }
+        .text-red { color: #dc2626; }
+        .text-muted { color: #6b7280; }
+        .total-row { font-weight: 700; border-top: 2px solid #1a1a1a; background: #f9fafb; }
+        .footer { margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 8px; font-size: 9px; color: #9ca3af; text-align: center; }
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; font-weight: 600; }
+        .badge-green { background: #dcfce7; color: #16a34a; }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        .badge-blue { background: #dbeafe; color: #2563eb; }
+        .badge-yellow { background: #fef3c7; color: #d97706; }
+        .section { page-break-inside: avoid; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ title|default:"Report" }}</h1>
+        <h3>{{ subtitle|default:"" }}</h3>
+        <div class="meta">Generated: {{ generated_at }} | MyInvento IMS | Company: {{ company_name|default:"MyInvento" }}</div>
+    </div>
+    {% block pdf_content %}{% endblock %}
+    <div class="footer">MyInvento Inventory Management System | {{ generated_at }} | Page 1 of 1</div>
+</body>
+</html>

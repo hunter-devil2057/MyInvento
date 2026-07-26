@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Suppliers{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:center;margin-bottom:24px">
+    <form method="get" class="search-box" style="width:320px;max-width:100%">
+        <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search suppliers..." style="text-align:center">
+    </form>
+</div>
+<div class="flex-between mb-4">
+    <div class="text-muted" style="font-size:14px">Total: <strong>{{ suppliers.paginator.count }}</strong> suppliers</div>
+    <a href="{% url 'supplier_create' %}" class="btn btn-primary">+ Add Supplier</a>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Supplier</th><th>Contact</th><th>Email</th><th>Phone</th><th>Lead Time</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for s in suppliers %}
+                <tr>
+                    <td><a href="{% url 'supplier_detail' s.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ s.name }}</a></td>
+                    <td>{{ s.contact_name|default:"-" }}</td>
+                    <td class="text-sm">{{ s.email|default:"-" }}</td>
+                    <td class="text-sm">{{ s.phone|default:"-" }}</td>
+                    <td>{{ s.lead_time_days|nepali }} days</td>
+                    <td>{% if s.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Inactive</span>{% endif %}</td>
+                    <td>
+                        <a href="{% url 'supplier_edit' s.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-truck"></i></span><h3>No suppliers yet</h3><p>Add suppliers to manage your purchase orders.</p><a href="{% url 'supplier_create' %}" class="btn btn-primary mt-2">+ Add Supplier</a></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination suppliers q=query %}
+{% endblock %}

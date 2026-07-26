@@ -1,0 +1,70 @@
+{% extends 'customers/portal_base.html' %}
+{% load number_tags %}
+{% block title %}Checkout{% endblock %}
+{% block portal_content %}
+<style>
+    .checkout-layout { display: grid; grid-template-columns: 1fr 400px; gap: 32px; max-width: 1000px; margin: 0 auto; padding: 40px 32px; }
+    .checkout-form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 28px; }
+    .checkout-summary { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 24px; position: sticky; top: 100px; }
+    .checkout-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-light); }
+    .checkout-item:last-child { border-bottom: none; }
+    @media (max-width: 768px) { .checkout-layout { grid-template-columns: 1fr; padding: 24px 16px; } .checkout-summary { position: static; } }
+</style>
+<div style="max-width:1000px;margin:0 auto;padding:40px 32px">
+    <a href="{% url 'portal_cart' %}" style="display:inline-flex;align-items:center;gap:6px;color:var(--primary);text-decoration:none;font-size:14px;font-weight:600;margin-bottom:24px"><i class="fa-solid fa-arrow-left"></i> Back to Cart</a>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="fa-solid fa-lock"></i></div>
+        <div>
+            <h1 style="font-size:26px;font-weight:800">Checkout</h1>
+            <p style="font-size:13px;color:var(--text-muted)">Complete your order</p>
+        </div>
+    </div>
+    <div class="checkout-layout" style="padding:0;max-width:none">
+        <div>
+            <form method="post">{% csrf_token %}
+                <div class="checkout-form-card" style="margin-bottom:20px">
+                    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-location-dot" style="color:var(--primary);margin-right:8px"></i>Delivery Address</h3>
+                    <div class="form-group"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="3" placeholder="Enter your delivery address">{{ customer.default_address|default:'' }}</textarea></div>
+                </div>
+                <div class="checkout-form-card" style="margin-bottom:20px">
+                    <h3 style="font-size:16px;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-credit-card" style="color:var(--primary);margin-right:8px"></i>Payment Method</h3>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                        <label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+                            <input type="radio" name="payment_method" value="Cash" checked style="accent-color:var(--primary);width:18px;height:18px">
+                            <div><div style="font-weight:600;font-size:14px">Cash on Pickup</div><div style="font-size:12px;color:var(--text-muted)">Pay when you collect your order</div></div>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+                            <input type="radio" name="payment_method" value="Card" style="accent-color:var(--primary);width:18px;height:18px">
+                            <div><div style="font-weight:600;font-size:14px">Pay at Store</div><div style="font-size:12px;color:var(--text-muted)">Card payment at the counter</div></div>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:10px;cursor:pointer;transition:all .2s">
+                            <input type="radio" name="payment_method" value="Khalti" style="accent-color:var(--primary);width:18px;height:18px">
+                            <div><div style="font-weight:600;font-size:14px">Pay with Khalti</div><div style="font-size:12px;color:var(--text-muted)">You'll be redirected to Khalti to complete payment</div></div>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;padding:16px;font-size:16px" onclick="return confirm('Place this order?')"><i class="fa-solid fa-check"></i> Place Order</button>
+            </form>
+        </div>
+        <div>
+            <div class="checkout-summary">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-bag-shopping" style="color:var(--primary);margin-right:6px"></i>Order Summary</h3>
+                {% for item in items %}
+                <div class="checkout-item">
+                    <div style="flex:1;min-width:0">
+                        <div style="font-weight:600;font-size:13px">{{ item.product.name }}</div>
+                        <div style="font-size:12px;color:var(--text-muted)">Qty: {{ item.quantity }}</div>
+                    </div>
+                    <div style="font-weight:600;font-size:13px">रू {{ item.line_total|floatformat:2|nepali }}</div>
+                </div>
+                {% endfor %}
+                <div style="margin-top:16px;padding-top:16px;border-top:2px solid var(--border)">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:14px;color:var(--text-muted)">Subtotal</span><span style="font-size:14px;font-weight:600">रू {{ cart.total|floatformat:2|nepali }}</span></div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:14px;color:var(--text-muted)">Shipping</span><span style="font-size:14px;font-weight:600;color:var(--success)">Free</span></div>
+                    <div style="display:flex;justify-content:space-between;padding-top:12px;border-top:1px solid var(--border)"><span style="font-size:16px;font-weight:800">Total</span><span style="font-size:20px;font-weight:900;color:var(--primary)">रू {{ cart.total|floatformat:2|nepali }}</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'customers/portal_base.html' %}
+{% load number_tags %}
+{% block title %}Order {{ order.invoice_number }}{% endblock %}
+{% block portal_content %}
+<style>
+    .order-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .order-stat { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; text-align: center; transition: all .25s; }
+    .order-stat:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .order-stat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text-muted); margin-bottom: 6px; }
+    .order-stat-value { font-size: 18px; font-weight: 800; }
+    @media (max-width: 640px) { .order-detail-grid { grid-template-columns: 1fr; } }
+</style>
+<div style="max-width:800px;margin:0 auto;padding:40px 32px">
+    <div class="flex-between mb-6">
+        <a href="{% url 'portal_order_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Orders</a>
+        <h1 style="font-size:var(--text-2xl);font-weight:700">{{ order.invoice_number|default:"Order" }}</h1>
+        <div></div>
+    </div>
+    <div class="order-detail-grid">
+        <div class="order-stat">
+            <div class="order-stat-label">Status</div>
+            <span class="order-stat-value" style="font-size:14px"><span class="badge {% if order.status == 'Completed' %}badge-success{% else %}badge-warning{% endif %}" style="padding:6px 16px">{{ order.status }}</span></span>
+        </div>
+        <div class="order-stat">
+            <div class="order-stat-label">Items</div>
+            <div class="order-stat-value">{{ lines|length }}</div>
+        </div>
+        <div class="order-stat">
+            <div class="order-stat-label">Total</div>
+            <div class="order-stat-value" style="color:var(--primary)">रू {{ order.grand_total|floatformat:2|nepali }}</div>
+        </div>
+    </div>
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px">
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border)"><h3 style="font-size:15px;font-weight:700"><i class="fa-solid fa-box" style="color:var(--primary);margin-right:6px"></i>Order Items</h3></div>
+        {% for line in lines %}
+        <div style="display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--border-light)">
+            <div style="flex:1;min-width:0">
+                <div style="font-weight:600;font-size:14px">{{ line.product.name }}</div>
+                <div style="font-size:13px;color:var(--text-muted)">{{ line.quantity|nepali }} x रू {{ line.unit_price|floatformat:2|nepali }}</div>
+            </div>
+            <div style="font-weight:700;color:var(--primary)">रू {{ line.subtotal|floatformat:2|nepali }}</div>
+        </div>
+        {% endfor %}
+        <div style="padding:16px 24px;display:flex;justify-content:space-between;align-items:center;font-weight:700">
+            <span>Grand Total</span>
+            <span style="font-size:18px;color:var(--primary)">रू {{ order.grand_total|floatformat:2|nepali }}</span>
+        </div>
+    </div>
+    {% if order.status == 'Completed' %}
+    <a href="{% url 'portal_return_request' order.pk %}" class="btn btn-outline" style="margin-top:8px"><i class="fa-solid fa-rotate-left"></i> Request Return</a>
+    {% endif %}
+</div>
+{% endblock %}

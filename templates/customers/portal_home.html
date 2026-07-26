@@ -1,0 +1,65 @@
+{% extends 'customers/portal_base.html' %}
+{% load number_tags %}
+{% block title %}Home{% endblock %}
+{% block portal_content %}
+<style>
+    .hero-section { position: relative; background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 50%, #1a1040 100%); color: #fff; text-align: center; padding: 80px 32px 60px; overflow: hidden; }
+    .hero-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 40%, rgba(99,102,241,.3) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(168,85,247,.2) 0%, transparent 50%); }
+    .hero-content { position: relative; z-index: 1; }
+    .hero-title { font-size: 44px; font-weight: 900; letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1; }
+    .hero-sub { font-size: 18px; opacity: .75; max-width: 500px; margin: 0 auto 32px; line-height: 1.6; }
+    .hero-shapes { position: absolute; inset: 0; pointer-events: none; }
+    .hero-shape { position: absolute; border-radius: 50%; background: rgba(255,255,255,.03); animation: float 6s ease-in-out infinite; }
+    .hero-shape:nth-child(1) { width: 200px; height: 200px; top: -50px; left: -50px; animation-delay: 0s; }
+    .hero-shape:nth-child(2) { width: 150px; height: 150px; bottom: -30px; right: -30px; animation-delay: 2s; }
+    .hero-shape:nth-child(3) { width: 100px; height: 100px; top: 30%; right: 10%; animation-delay: 4s; }
+    @keyframes float { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 48px; }
+    .feature-card { text-align: center; padding: 28px 20px; }
+    .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 14px; }
+    @media (max-width: 768px) { .hero-title { font-size: 32px; } .hero-section { padding: 60px 20px 40px; } .feature-grid { grid-template-columns: 1fr; } }
+</style>
+<div class="hero-section">
+    <div class="hero-shapes"><div class="hero-shape"></div><div class="hero-shape"></div><div class="hero-shape"></div></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Welcome to<br>MyInvento Store</h1>
+        <p class="hero-sub">Browse our catalog, shop with confidence, and track your orders all in one place.</p>
+        <a href="{% url 'portal_catalog' %}" class="btn btn-primary btn-lg" style="padding:16px 36px;font-size:16px;background:#fff;color:#1e293b;box-shadow:0 4px 20px rgba(255,255,255,.2)"><i class="fa-solid fa-bag-shopping"></i> Browse Catalog</a>
+    </div>
+</div>
+<div style="max-width:1200px;margin:0 auto;padding:0 32px 60px">
+    <div class="feature-grid" style="margin-top:32px">
+        <div class="card feature-card">
+            <div class="feature-icon" style="background:#dcfce7;color:#16a34a"><i class="fa-solid fa-bolt"></i></div>
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Fast Delivery</h3>
+            <p style="font-size:13px;color:var(--text-muted)">Quick processing and reliable delivery to your doorstep</p>
+        </div>
+        <div class="card feature-card">
+            <div class="feature-icon" style="background:#dbeafe;color:#2563eb"><i class="fa-solid fa-shield-halved"></i></div>
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Secure Payment</h3>
+            <p style="font-size:13px;color:var(--text-muted)">Safe and secure payment methods at your convenience</p>
+        </div>
+        <div class="card feature-card">
+            <div class="feature-icon" style="background:#fef3c7;color:#d97706"><i class="fa-solid fa-headset"></i></div>
+            <h3 style="font-size:16px;font-weight:700;margin-bottom:6px">Support</h3>
+            <p style="font-size:13px;color:var(--text-muted)">Dedicated support team for all your queries</p>
+        </div>
+    </div>
+    <div style="text-align:center;margin-top:56px;margin-bottom:32px">
+        <h2 style="font-size:26px;font-weight:800;margin-bottom:8px">Featured Products</h2>
+        <p style="color:var(--text-muted);font-size:15px">Handpicked items just for you</p>
+    </div>
+    <div class="product-grid">
+        {% for p in products %}
+        <a href="{% url 'portal_product_detail' p.pk %}" class="product-card" style="text-decoration:none;color:var(--text)">
+            {% if p.image_url %}<img src="{{ p.image_url }}" alt="{{ p.name }}">{% elif p.primary_image %}<img src="{{ p.primary_image.image.url }}" alt="{{ p.name }}">{% else %}<div class="placeholder-img" style="height:220px;font-size:48px"><i class="fa-solid fa-star"></i></div>{% endif %}
+            <div class="card-content text-center">
+                <div style="font-weight:600;margin-bottom:4px;font-size:15px">{{ p.name }}</div>
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">{{ p.sku }}</div>
+                <div class="price">रू {{ p.sale_price|floatformat:2|nepali }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

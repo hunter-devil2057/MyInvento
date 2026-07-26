@@ -1,0 +1,13 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="section">
+<table>
+<thead><tr><th>#</th><th>Product</th><th>SKU</th><th class="text-right">Qty Sold</th><th class="text-right">Revenue</th></tr></thead>
+<tbody>
+{% for p in products %}
+<tr><td>{{ forloop.counter }}</td><td class="font-bold">{{ p.name }}</td><td class="text-muted">{{ p.sku }}</td><td class="text-right">{{ p.total_sold|default:0 }}</td><td class="text-right font-bold">रू {{ p.total_revenue|default:0|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

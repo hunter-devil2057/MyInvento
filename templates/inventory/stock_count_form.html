@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Start Count{% endblock %}
+{% block page_title %}Start New Count Session{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'stock_count_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Counts</a>
+    <div></div>
+    <div></div>
+</div>
+<div style="max-width:500px;margin:0 auto">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Select Warehouse *</label>
+                    {{ form.warehouse }}
+                </div>
+                <p class="text-muted text-sm">All products in this warehouse will be included in the count sheet.</p>
+                <div class="flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Start Count</button>
+                    <a href="{% url 'stock_count_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

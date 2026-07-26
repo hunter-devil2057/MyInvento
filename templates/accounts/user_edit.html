@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Edit User{% endblock %}
+{% block page_title %}Edit User: {{ target_user.username }}{% endblock %}
+{% block content %}
+<div style="max-width:600px;margin:0 auto;width:100%">
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" name="first_name" class="form-input" value="{{ target_user.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" name="last_name" class="form-input" value="{{ target_user.last_name }}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-input" value="{{ target_user.email }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Role</label>
+                    <select name="role" class="form-input">
+                        {% for val, label in profile.ROLE_CHOICES %}
+                        <option value="{{ val }}" {% if profile.role == val %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="phone" class="form-input" value="{{ profile.phone|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                        <input type="checkbox" name="is_active" {% if target_user.is_active %}checked{% endif %}>
+                        <span class="form-label" style="margin:0">Active</span>
+                    </label>
+                </div>
+                <div class="flex gap-2">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{% url 'user_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

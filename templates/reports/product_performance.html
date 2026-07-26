@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Product Performance{% endblock %}
+{% block page_title %}Product Performance{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+        <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body" style="padding:0">
+        <table>
+            <thead><tr><th>#</th><th>Product</th><th>SKU</th><th>Qty Sold</th><th>Revenue</th><th>Profit</th><th>Transactions</th></tr></thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td style="font-weight:600">{{ p.name }}</td>
+                    <td class="text-sm text-muted">{{ p.sku }}</td>
+                    <td>{{ p.total_sold|default:0|nepali }}</td>
+                    <td style="font-weight:600">रू {{ p.total_revenue|default:0|floatformat:2|nepali }}</td>
+                    <td style="font-weight:600;color:var(--success)">रू {% widthratio p.total_revenue p.total_sold 1 %}</td>
+                    <td>{{ p.transaction_count|default:0|nepali }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No product data yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

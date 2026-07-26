@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}POS{% endblock %}
+{% block page_title %}{% endblock %}
+{% block content %}
+<style>
+    .content-area { padding: 0 !important; overflow: hidden !important; }
+    .admin-footer { display: none !important; }
+</style>
+<div id="react-pos"></div>
+<script type="module" src="{% static 'frontend/pos.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Delete Channel{% endblock %}
+{% block page_title %}Delete Channel{% endblock %}
+{% block content %}
+<div style="max-width:500px;margin:0 auto">
+    <div class="card">
+        <div class="card-body" style="text-align:center">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:48px;color:var(--danger);margin-bottom:16px"></i>
+            <h3 style="margin-bottom:8px">Delete "{{ channel.name }}"?</h3>
+            <p style="color:var(--text-muted);margin-bottom:24px">This channel will be permanently removed. Existing transactions using this channel are preserved.</p>
+            <div class="flex gap-2" style="justify-content:center">
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Channel</button>
+                </form>
+                <a href="{% url 'channel_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

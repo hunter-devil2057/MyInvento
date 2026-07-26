@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Sales Report{% endblock %}
+{% block page_title %}Sales Report{% endblock %}
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2" style="flex-wrap:wrap">
+        <a href="?days=7" class="btn btn-sm {% if days == 7 %}btn-primary{% else %}btn-outline{% endif %}">7 Days</a>
+        <a href="?days=30" class="btn btn-sm {% if days == 30 %}btn-primary{% else %}btn-outline{% endif %}">30 Days</a>
+        <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
+        <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'export_csv' 'sales' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-file-csv"></i> Export CSV</a>
+    </div>
+</div>
+<div class="kpi-grid stagger-in">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Sales ({{ days }}d)</div><div class="kpi-value">रू {{ total_sales|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-file-invoice"></i></div><div class="kpi-info"><div class="kpi-label">Total Transactions</div><div class="kpi-value">{{ total_transactions|nepali }}</div></div></div>
+</div>
+<div class="grid-2 mb-6">
+    <div class="card"><div class="card-header"><h3>Sales Trend</h3></div><div class="card-body"><canvas id="salesTrendChart" height="200"></canvas></div></div>
+    <div class="card"><div class="card-header"><h3>Top Products</h3></div>
+        <div class="card-body" style="padding:0"><table><thead><tr><th>Product</th><th>Qty</th><th>Revenue</th></tr></thead>
+        <tbody>{% for p in top_products %}<tr><td style="font-weight:600">{{ p.product__name }}</td><td>{{ p.total_qty|nepali }}</td><td style="font-weight:600">रू {{ p.total_revenue|floatformat:2|nepali }}</td></tr>{% empty %}<tr><td colspan="3" class="text-center text-muted" style="padding:30px">No data.</td></tr>{% endfor %}</tbody></table></div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+    const ctx=document.getElementById('salesTrendChart');
+    if(ctx){new Chart(ctx,{type:'bar',data:{labels:[{% for d in by_day %}'{{ d.date }}',{% endfor %}],datasets:[{label:'Sales (रू)',data:[{% for d in by_day %}{{ d.total|floatformat:0|nepali }},{% endfor %}],backgroundColor:'#2563eb',borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});}
+});
+</script>
+{% endblock %}

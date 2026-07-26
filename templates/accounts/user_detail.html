@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}{{ target_user.username }}{% endblock %}
+{% block page_title %}{% endblock %}
+{% block content %}
+<style>
+    .ud-hero { display: flex; align-items: center; gap: 20px; padding: 28px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; margin-bottom: 20px; }
+    .ud-avatar { width: 72px; height: 72px; border-radius: 18px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 24px; color: #fff; flex-shrink: 0; background: linear-gradient(135deg, var(--primary), #a855f7); }
+    .ud-hero-info { flex: 1; min-width: 0; }
+    .ud-hero-name { font-size: 22px; font-weight: 800; margin-bottom: 2px; }
+    .ud-hero-sub { font-size: 13px; color: var(--text-muted); }
+    .ud-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .ud-badges .badge { font-size: 11px; padding: 3px 10px; }
+    .ud-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    .ud-kpi { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; transition: transform .2s, box-shadow .2s; }
+    .ud-kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+    .ud-kpi i { font-size: 20px; margin-bottom: 8px; display: block; }
+    .ud-kpi .val { font-size: 22px; font-weight: 800; line-height: 1.2; }
+    .ud-kpi .lbl { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+    .ud-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; margin-bottom: 16px; overflow: hidden; }
+    .ud-section-head { display: flex; align-items: center; gap: 10px; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+    .ud-section-head i { color: var(--primary); font-size: 16px; }
+    .ud-section-head h3 { font-size: 14px; font-weight: 700; margin: 0; }
+    .ud-section-body { padding: 16px 20px; }
+    .ud-info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .ud-info-row:last-child { border-bottom: none; }
+    .ud-info-label { font-size: 13px; color: var(--text-muted); }
+    .ud-info-value { font-size: 13px; font-weight: 600; text-align: right; }
+    .ud-log-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .ud-log-item:last-child { border-bottom: none; }
+    .ud-log-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .ud-log-dot.create { background: #10b981; }
+    .ud-log-dot.update { background: #6366f1; }
+    .ud-log-dot.delete { background: #ef4444; }
+    .ud-log-dot.login { background: #06b6d4; }
+    .ud-log-dot.logout { background: #64748b; }
+    .ud-log-dot.other { background: #f59e0b; }
+    .ud-log-content { flex: 1; min-width: 0; }
+    .ud-log-action { font-size: 13px; font-weight: 600; }
+    .ud-log-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ud-log-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+    .ud-sale-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+    .ud-sale-row:last-child { border-bottom: none; }
+    .ud-sale-invoice { font-weight: 600; font-size: 13px; color: var(--primary); text-decoration: none; min-width: 120px; }
+    .ud-sale-amount { font-weight: 700; font-size: 13px; }
+    .ud-sale-status { flex-shrink: 0; }
+    .ud-sale-date { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+    .ud-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media(max-width:900px) { .ud-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media(max-width:768px) {
+        .ud-hero { flex-direction: column; text-align: center; padding: 24px 16px; }
+        .ud-badges { justify-content: center; }
+        .ud-grid-2 { grid-template-columns: 1fr; }
+        .ud-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        .ud-info-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+        .ud-info-value { text-align: left; }
+        .ud-sale-row { flex-wrap: wrap; }
+    }
+    @media(max-width:480px) {
+        .ud-kpi-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+        .ud-kpi { padding: 12px 8px; }
+        .ud-kpi .val { font-size: 18px; }
+    }
+</style>
+
+<div class="flex-between mb-6">
+    <a href="{% url 'user_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Users</a>
+    <h1 style="font-size:var(--text-2xl);font-weight:700">{{ target_user.username }}</h1>
+    <div class="flex gap-2">
+        <a href="{% url 'user_edit' target_user.pk %}" class="btn btn-primary"><i class="fa-solid fa-pen"></i> Edit Profile</a>
+        {% if request.user.is_superuser and not target_user.is_superuser %}
+        <form method="post" action="{% url 'user_role_change' target_user.pk %}" style="display:inline" id="roleForm">
+            {% csrf_token %}
+            <select name="role" class="form-input" style="padding:8px 12px;font-size:13px;font-weight:600;border-radius:8px;height:auto" onchange="if(confirm('Change role to '+this.value+'?')) this.form.submit(); else this.value='{{ profile.role }}'">
+                {% for val, label in profile.ROLE_CHOICES %}
+                <option value="{{ val }}" {% if profile.role == val %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% endif %}
+        {% if request.user.is_superuser %}
+        <a href="{% url 'admin_panel' %}" class="btn btn-outline"><i class="fa-solid fa-gauge-high"></i> Admin Panel</a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="ud-hero">
+    <div class="ud-avatar" style="background:{% if profile %}{{ profile.role_color }}{% else %}linear-gradient(135deg, var(--primary), #a855f7){% endif %}">
+        {% if profile %}<i class="{{ profile.role_icon }}" style="font-size:28px"></i>{% else %}{{ target_user.first_name|first|upper }}{{ target_user.last_name|first|upper }}{% endif %}
+    </div>
+    <div class="ud-hero-info">
+        <div class="ud-hero-name">{{ target_user.get_full_name|default:target_user.username }}</div>
+        <div class="ud-hero-sub">@{{ target_user.username }} &middot; {{ target_user.email|default:"No email" }}</div>
+        <div class="ud-badges">
+            {% if profile %}<span class="badge badge-primary"><i class="{{ profile.role_icon }}"></i> {{ profile.get_role_display }}</span>{% endif %}
+            {% if target_user.is_active %}<span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Active</span>{% else %}<span class="badge badge-danger"><i class="fa-solid fa-circle-xmark"></i> Inactive</span>{% endif %}
+            {% if target_user.is_superuser %}<span class="badge badge-warning"><i class="fa-solid fa-crown"></i> Superuser</span>{% endif %}
+            {% if target_user.is_staff %}<span class="badge badge-secondary"><i class="fa-solid fa-key"></i> Staff</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="ud-kpi-grid">
+    <div class="ud-kpi">
+        <i class="fa-solid fa-right-to-bracket" style="color:var(--success)"></i>
+        <div class="val">{{ login_count }}</div>
+        <div class="lbl">Total Logins</div>
+    </div>
+    <div class="ud-kpi">
+        <i class="fa-solid fa-pen-to-square" style="color:var(--primary)"></i>
+        <div class="val">{{ total_actions }}</div>
+        <div class="lbl">Actions Performed</div>
+    </div>
+    <div class="ud-kpi">
+        <i class="fa-solid fa-cash-register" style="color:var(--warning)"></i>
+        <div class="val">{{ sales_count }}</div>
+        <div class="lbl">Sales Made</div>
+    </div>
+    <div class="ud-kpi">
+        <i class="fa-solid fa-money-bill-wave" style="color:var(--info)"></i>
+        <div class="val">रू {{ sales_revenue|floatformat:2|nepali }}</div>
+        <div class="lbl">Revenue</div>
+    </div>
+</div>
+
+{% if request.user.is_superuser %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;margin-bottom:20px">
+    {% if target_user.is_superuser %}
+    <div style="background:var(--card-bg);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(245,158,11,.1);color:#f59e0b">
+            <i class="fa-solid fa-shield-halved"></i>
+        </div>
+        <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:#f59e0b">Protected Account</div>
+            <div style="font-size:11px;color:var(--text-muted)">Main admin cannot be deactivated, deleted, or have role changed</div>
+        </div>
+    </div>
+    {% else %}
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:{% if target_user.is_active %}rgba(239,68,68,.1);color:#ef4444{% else %}rgba(16,185,129,.1);color:#10b981{% endif %}">
+            <i class="fa-solid {% if target_user.is_active %}fa-user-lock{% else %}fa-user-check{% endif %}"></i>
+        </div>
+        <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">{% if target_user.is_active %}Deactivate{% else %}Activate{% endif %} User</div>
+            <div style="font-size:11px;color:var(--text-muted)">{% if target_user.is_active %}Prevent login access{% else %}Restore login access{% endif %}</div>
+        </div>
+        <form method="post" action="{% if target_user.is_active %}{% url 'user_deactivate' target_user.pk %}{% else %}{% url 'user_activate' target_user.pk %}{% endif %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm {% if target_user.is_active %}btn-danger{% else %}btn-primary{% endif %}" onclick="return confirm('{% if target_user.is_active %}Deactivate{% else %}Activate{% endif %} {{ target_user.username }}? {% if target_user.is_active %}They will not be able to log in.{% else %}They will be able to log in again.{% endif %}')">
+                {% if target_user.is_active %}Deactivate{% else %}Activate{% endif %}
+            </button>
+        </form>
+    </div>
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(239,68,68,.1);color:#ef4444">
+            <i class="fa-solid fa-key"></i>
+        </div>
+        <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">Reset Password</div>
+            <div style="font-size:11px;color:var(--text-muted)">Set a new password</div>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('pwdResetSection').style.display=document.getElementById('pwdResetSection').style.display==='none'?'block':'none'">
+            <i class="fa-solid fa-key"></i>
+        </button>
+    </div>
+    <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:rgba(239,68,68,.1);color:#ef4444">
+            <i class="fa-solid fa-trash-can"></i>
+        </div>
+        <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">Delete User</div>
+            <div style="font-size:11px;color:var(--text-muted)">Permanent removal</div>
+        </div>
+        <a href="{% url 'user_delete' target_user.pk %}" class="btn btn-sm btn-danger" data-no-confirm>
+            <i class="fa-solid fa-trash-can"></i>
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% if not target_user.is_superuser %}
+<div id="pwdResetSection" style="display:none;margin-bottom:20px">
+    <div class="ud-section">
+        <div class="ud-section-head"><i class="fa-solid fa-key"></i><h3>Reset Password</h3></div>
+        <div class="ud-section-body">
+            <form method="post" action="{% url 'admin_reset_password' target_user.pk %}" onsubmit="return confirm('Set new password for {{ target_user.username }}?')">
+                {% csrf_token %}
+                <div style="display:flex;gap:8px;align-items:flex-end">
+                    <div style="flex:1">
+                        <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:4px">New Password</label>
+                        <input type="text" name="new_password" required minlength="6" class="form-input" placeholder="Enter new password (min 6 chars)">
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-key"></i> Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<div class="ud-grid-2">
+    <div>
+        <div class="ud-section">
+            <div class="ud-section-head"><i class="fa-solid fa-user"></i><h3>Account Information</h3></div>
+            <div class="ud-section-body">
+                <div class="ud-info-row"><span class="ud-info-label">Username</span><span class="ud-info-value">{{ target_user.username }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Email</span><span class="ud-info-value">{{ target_user.email|default:"-" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Phone</span><span class="ud-info-value">{{ profile.phone|default:"-" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Full Name</span><span class="ud-info-value">{{ target_user.get_full_name|default:"-" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Role</span><span class="ud-info-value">{{ profile.get_role_display|default:"Admin" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">User ID</span><span class="ud-info-value" style="font-family:monospace">#{{ target_user.pk }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Password</span><span class="ud-info-value"><span style="filter:blur(6px);cursor:pointer;font-family:monospace;font-size:11px;transition:filter .2s" onclick="this.style.filter=this.style.filter==='none'?'blur(6px)':'none'" title="Click to reveal">{{ target_user.password }}</span></span></div>
+                {% if request.user.is_superuser and not target_user.is_superuser %}
+                <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-light)">
+                    <form method="post" action="{% url 'admin_reset_password' target_user.pk %}" onsubmit="return confirm('Set new password for {{ target_user.username }}?')">
+                        {% csrf_token %}
+                        <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px">Set New Password</label>
+                        <div style="display:flex;gap:8px">
+                            <input type="text" name="new_password" required minlength="6" class="form-input" placeholder="Enter new password" style="flex:1">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-key"></i> Reset</button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="ud-section">
+            <div class="ud-section-head"><i class="fa-solid fa-clock-rotate-left"></i><h3>Session Information</h3></div>
+            <div class="ud-section-body">
+                <div class="ud-info-row"><span class="ud-info-label">Joined</span><span class="ud-info-value">{{ target_user.date_joined|date:"d M Y, g:i A" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Last Login</span><span class="ud-info-value">{{ target_user.last_login|date:"d M Y, g:i A"|default:"Never" }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Total Logins</span><span class="ud-info-value">{{ login_count }}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Is Active</span><span class="ud-info-value">{% if target_user.is_active %}<span style="color:#10b981">Yes</span>{% else %}<span style="color:#ef4444">No</span>{% endif %}</span></div>
+                <div class="ud-info-row"><span class="ud-info-label">Last Updated</span><span class="ud-info-value">{{ target_user.last_login|date:"d M Y"|default:"-" }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        {% if recent_sales %}
+        <div class="ud-section" style="margin-bottom:16px">
+            <div class="ud-section-head"><i class="fa-solid fa-file-invoice"></i><h3>Recent Sales ({{ sales_count }} total)</h3></div>
+            <div class="ud-section-body" style="padding:12px 20px">
+                {% for s in recent_sales %}
+                <div class="ud-sale-row">
+                    <a href="{% url 'transaction_detail' s.uuid %}" class="ud-sale-invoice">{{ s.invoice_number|default:"Draft" }}</a>
+                    <span class="ud-sale-amount">रू {{ s.grand_total|floatformat:2|nepali }}</span>
+                    <span class="ud-sale-status"><span class="badge {% if s.status == 'Completed' %}badge-success{% elif s.status == 'Draft' %}badge-secondary{% else %}badge-warning{% endif %}">{{ s.status }}</span></span>
+                    <span class="ud-sale-date">{{ s.completed_at|date:"d M, g:i A"|default:"-" }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="ud-section">
+            <div class="ud-section-head"><i class="fa-solid fa-clock-rotate-left"></i><h3>Activity Log ({{ logs_page.paginator.count }} entries)</h3></div>
+            <div class="ud-section-body" style="padding:8px 20px">
+                {% for log in logs_page %}
+                <div class="ud-log-item">
+                    <div class="ud-log-dot {% if log.action == 'Create' %}create{% elif log.action == 'Update' %}update{% elif log.action == 'Delete' %}delete{% elif log.action == 'Login' %}login{% elif log.action == 'Logout' %}logout{% else %}other{% endif %}"></div>
+                    <div class="ud-log-content">
+                        <div class="ud-log-action">
+                            <span class="badge {% if log.action == 'Create' %}badge-success{% elif log.action == 'Update' %}badge-primary{% elif log.action == 'Delete' %}badge-danger{% elif log.action == 'Login' %}badge-info{% elif log.action == 'Logout' %}badge-secondary{% else %}badge-warning{% endif %}" style="font-size:10px;padding:2px 8px">{{ log.action }}</span>
+                            {{ log.model_name|default:"System" }}
+                        </div>
+                        <div class="ud-log-detail">{{ log.object_repr|default:"-" }}</div>
+                    </div>
+                    <div class="ud-log-time">
+                        <div>{{ log.timestamp|date:"d M, g:i A" }}</div>
+                        {% if log.ip_address %}<div style="font-family:monospace;font-size:10px;color:var(--text-muted)">{{ log.ip_address }}</div>{% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div style="text-align:center;padding:30px;color:var(--text-muted);font-size:13px"><i class="fa-solid fa-clock" style="display:block;font-size:24px;margin-bottom:8px;opacity:.3"></i>No activity recorded yet.</div>
+                {% endfor %}
+                {% if logs_page.has_other_pages %}
+                <div style="padding:12px 0 4px">
+                    {% smart_pagination logs_page 'logs_page' user_pk=target_user.pk %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

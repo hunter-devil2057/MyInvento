@@ -1,0 +1,29 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Total Returns</div><div class="value red">{{ total_returns }}</div></div>
+    <div class="kpi-box"><div class="label">Total Refunded</div><div class="value red">रू {{ total_refund|floatformat:2 }}</div></div>
+</div>
+<div class="section">
+<h2>By Status</h2>
+<table>
+<thead><tr><th>Status</th><th class="text-right">Count</th><th class="text-right">Refund</th></tr></thead>
+<tbody>
+{% for s in by_status %}
+<tr><td class="font-bold">{{ s.status }}</td><td class="text-right">{{ s.count }}</td><td class="text-right">रू {{ s.total|default:0|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+<div class="section">
+<h2>Most Returned Products</h2>
+<table>
+<thead><tr><th>Product</th><th class="text-right">Qty Returned</th><th class="text-right">Returns</th></tr></thead>
+<tbody>
+{% for p in by_product %}
+<tr><td class="font-bold">{{ p.transaction_line__product__name }}</td><td class="text-right text-red">{{ p.qty }}</td><td class="text-right">{{ p.count }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

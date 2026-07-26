@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Stock Levels{% endblock %}
+{% block page_title %}Stock Overview{% endblock %}
+{% block content %}
+<form method="get" style="margin-bottom:24px">
+    <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap">
+        <input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search stock..." style="width:220px;text-align:center">
+        <select name="warehouse" class="form-input" style="width:180px" onchange="this.form.submit()">
+            <option value="">All Warehouses</option>
+            {% for w in warehouses %}
+            <option value="{{ w.pk }}" {% if selected_warehouse == w.pk|stringformat:"d" %}selected{% endif %}>{{ w.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="low_stock" class="form-input" style="width:160px" onchange="this.form.submit()">
+            <option value="">All Stock Levels</option>
+            <option value="1" {% if low_stock == '1' %}selected{% endif %}>Low Stock Only</option>
+        </select>
+    </div>
+</form>
+<div class="flex-between mb-4">
+    <p class="text-muted" style="font-size:13px">{{ stock_levels.paginator.count }} record{{ stock_levels.paginator.count|pluralize }}</p>
+    <div class="text-muted" style="font-size:14px">Total Value: <strong style="color:var(--text)">रू {{ total_value|floatformat:0|nepali }}</strong></div>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+                {% for sl in stock_levels %}
+                <tr>
+                    <td><a href="{% url 'product_detail' sl.product.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ sl.product.name }}</a></td>
+                    <td class="text-sm text-muted">{{ sl.product.sku }}</td>
+                    <td>{{ sl.warehouse.name }}</td>
+                    <td style="font-weight:600">{{ sl.quantity_on_hand|nepali }}</td>
+                    <td>{{ sl.quantity_reserved|nepali }}</td>
+                    <td><span class="badge {% if sl.available_quantity <= 0 %}badge-danger{% elif sl.available_quantity <= 10 %}badge-warning{% else %}badge-success{% endif %}">{{ sl.available_quantity|nepali }}</span></td>
+                    <td><a href="{% url 'stock_adjust_product' sl.product.uuid %}" class="btn btn-outline btn-sm">Adjust</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:40px">No stock records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination stock_levels q=query warehouse=selected_warehouse low_stock=low_stock %}
+{% endblock %}

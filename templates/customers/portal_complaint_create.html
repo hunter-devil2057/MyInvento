@@ -1,0 +1,133 @@
+{% extends 'customers/portal_base.html' %}
+{% block title %}Submit Complaint{% endblock %}
+{% block portal_content %}
+<style>
+    .complaint-form-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 700px; margin: 0 auto; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .category-option { position: relative; }
+    .category-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .category-option label { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 12px; border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all .25s; text-align: center; font-size: 12px; font-weight: 600; color: var(--text-muted); background: var(--card-bg); }
+    .category-option label i { font-size: 22px; transition: transform .25s; }
+    .category-option label:hover { border-color: var(--primary); transform: translateY(-2px); }
+    .category-option input:checked + label { border-color: var(--primary); background: rgba(99,102,241,.08); color: var(--primary); box-shadow: 0 2px 12px rgba(99,102,241,.2); }
+    .category-option input:checked + label i { transform: scale(1.15); }
+    .priority-options { display: flex; gap: 10px; flex-wrap: wrap; }
+    .priority-option { position: relative; }
+    .priority-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .priority-option label { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border: 2px solid var(--border); border-radius: 20px; cursor: pointer; transition: all .25s; font-size: 13px; font-weight: 600; color: var(--text-muted); background: var(--card-bg); }
+    .priority-option label:hover { border-color: var(--primary); }
+    .priority-option input:checked + label.pri-low { border-color: #64748b; background: rgba(100,116,139,.1); color: #64748b; }
+    .priority-option input:checked + label.pri-medium { border-color: #f59e0b; background: rgba(245,158,11,.1); color: #f59e0b; }
+    .priority-option input:checked + label.pri-high { border-color: #f97316; background: rgba(249,115,22,.1); color: #f97316; }
+    .priority-option input:checked + label.pri-urgent { border-color: #ef4444; background: rgba(239,68,68,.1); color: #ef4444; }
+    @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } .category-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+<div style="max-width:800px;margin:0 auto;padding:40px 32px">
+    <div class="flex-between mb-6">
+        <a href="{% url 'portal_complaint_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Support</a>
+        <h1 style="font-size:var(--text-2xl);font-weight:700">Submit Complaint</h1>
+        <div></div>
+    </div>
+            <h1 style="font-size:26px;font-weight:800">Submit a Complaint</h1>
+            <p style="font-size:13px;color:var(--text-muted)">Tell us what went wrong and we'll get back to you</p>
+        </div>
+    </div>
+
+    <div class="complaint-form-card">
+        <form method="post">{% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Category</label>
+                <div class="category-grid">
+                    <div class="category-option">
+                        <input type="radio" name="category" value="product_quality" id="cat_pq" checked>
+                        <label for="cat_pq"><i class="fa-solid fa-box-open" style="color:#6366f1"></i> Product Quality</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="delivery" id="cat_dl">
+                        <label for="cat_dl"><i class="fa-solid fa-truck" style="color:#10b981"></i> Delivery</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="payment" id="cat_pm">
+                        <label for="cat_pm"><i class="fa-solid fa-credit-card" style="color:#a855f7"></i> Payment</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="service" id="cat_sv">
+                        <label for="cat_sv"><i class="fa-solid fa-users" style="color:#06b6d4"></i> Service</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="website" id="cat_wb">
+                        <label for="cat_wb"><i class="fa-solid fa-globe" style="color:#f59e0b"></i> Website</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="refund" id="cat_rf">
+                        <label for="cat_rf"><i class="fa-solid fa-money-bill-wave" style="color:#ec4899"></i> Refund</label>
+                    </div>
+                    <div class="category-option">
+                        <input type="radio" name="category" value="other" id="cat_ot">
+                        <label for="cat_ot"><i class="fa-solid fa-circle-question" style="color:#64748b"></i> Other</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Priority</label>
+                <div class="priority-options">
+                    <div class="priority-option">
+                        <input type="radio" name="priority" value="low" id="pri_low">
+                        <label for="pri_low" class="pri-low"><i class="fa-solid fa-flag"></i> Low</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" name="priority" value="medium" id="pri_med" checked>
+                        <label for="pri_med" class="pri-medium"><i class="fa-solid fa-flag"></i> Medium</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" name="priority" value="high" id="pri_high">
+                        <label for="pri_high" class="pri-high"><i class="fa-solid fa-flag"></i> High</label>
+                    </div>
+                    <div class="priority-option">
+                        <input type="radio" name="priority" value="urgent" id="pri_urgent">
+                        <label for="pri_urgent" class="pri-urgent"><i class="fa-solid fa-flag"></i> Urgent</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Subject</label>
+                <input type="text" name="subject" class="form-input" placeholder="Brief summary of your issue" required maxlength="200">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea name="description" class="form-input" rows="5" placeholder="Please describe your issue in detail..." required style="resize:vertical"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Related Order (optional)</label>
+                    <select name="order_id" class="form-input">
+                        <option value="">-- Select order --</option>
+                        {% for order in orders %}
+                        <option value="{{ order.pk }}">{{ order.invoice_number }} — {{ order.created_at|date:"d M Y" }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Related Product (optional)</label>
+                    <select name="product_id" class="form-input">
+                        <option value="">-- Select product --</option>
+                        {% for product in products %}
+                        <option value="{{ product.pk }}">{{ product.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px">
+                <button type="submit" class="btn btn-primary btn-lg" style="flex:1;background:linear-gradient(135deg,#f59e0b,#f43f5e);box-shadow:0 2px 10px rgba(245,158,11,.3)"><i class="fa-solid fa-paper-plane"></i> Submit Complaint</button>
+                <a href="{% url 'portal_complaint_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}System Settings{% endblock %}
+{% block page_title %}Global System Settings{% endblock %}
+{% block content %}
+
+<form method="post" style="max-width:900px">
+    {% csrf_token %}
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-building"></i> Company Information</h3></div>
+        <div class="card-body">
+            <div class="grid-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" name="company_name" class="form-input" value="{{ sys_settings.company_name }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company Email</label>
+                    <input type="email" name="company_email" class="form-input" value="{{ sys_settings.company_email }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="company_phone" class="form-input" value="{{ sys_settings.company_phone }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="company_address" class="form-input" value="{{ sys_settings.company_address }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-coins"></i> Currency & Financial</h3></div>
+        <div class="card-body">
+            <div class="grid-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Currency Code</label>
+                    <input type="text" name="currency_code" class="form-input" value="{{ sys_settings.currency_code }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Currency Symbol</label>
+                    <input type="text" name="currency_symbol" class="form-input" value="{{ sys_settings.currency_symbol }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Default Tax Rate (%)</label>
+                    <input type="number" name="default_tax_rate" class="form-input" step="0.01" min="0" value="{{ sys_settings.default_tax_rate }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Valuation Method</label>
+                    <select name="default_valuation_method" class="form-input">
+                        <option value="FIFO" {% if sys_settings.default_valuation_method == 'FIFO' %}selected{% endif %}>FIFO</option>
+                        <option value="LIFO" {% if sys_settings.default_valuation_method == 'LIFO' %}selected{% endif %}>LIFO</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-chart-simple"></i> Stock Thresholds</h3></div>
+        <div class="card-body">
+            <div class="grid-2 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Low Stock Alert Threshold</label>
+                    <input type="number" name="low_stock_threshold" class="form-input" min="0" value="{{ sys_settings.low_stock_threshold }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Overstock Threshold</label>
+                    <input type="number" name="overstock_threshold" class="form-input" min="0" value="{{ sys_settings.overstock_threshold }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Expiry Alert Days</label>
+                    <input type="number" name="expiry_alert_days" class="form-input" min="0" value="{{ sys_settings.expiry_alert_days }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Receipt Footer Text</label>
+                    <input type="text" name="receipt_footer_text" class="form-input" value="{{ sys_settings.receipt_footer_text }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-sliders"></i> Feature Toggles</h3></div>
+        <div class="card-body">
+            <div class="grid-2 gap-4">
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="auto_reorder_enabled" {% if sys_settings.auto_reorder_enabled %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Auto Reorder</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="require_purchase_order_approval" {% if sys_settings.require_purchase_order_approval %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Require PO Approval</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="enable_batch_tracking" {% if sys_settings.enable_batch_tracking %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Batch Tracking</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="enable_serial_tracking" {% if sys_settings.enable_serial_tracking %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Serial Number Tracking</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-shield-halved"></i> Security & Sessions</h3></div>
+        <div class="card-body">
+            <div class="grid-3 gap-4">
+                <div class="form-group">
+                    <label class="form-label">Session Timeout (minutes)</label>
+                    <input type="number" name="session_timeout_minutes" class="form-input" min="0" value="{{ sys_settings.session_timeout_minutes }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Login Attempts</label>
+                    <input type="number" name="max_login_attempts" class="form-input" min="0" value="{{ sys_settings.max_login_attempts }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Lockout Duration (minutes)</label>
+                    <input type="number" name="lockout_duration_minutes" class="form-input" min="0" value="{{ sys_settings.lockout_duration_minutes }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header"><h3><i class="fa-solid fa-bell"></i> Notification Settings</h3></div>
+        <div class="card-body">
+            <div class="grid-2 gap-4">
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="enable_email_notifications" {% if sys_settings.enable_email_notifications %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Email Notifications</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="enable_low_stock_alerts" {% if sys_settings.enable_low_stock_alerts %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Low Stock Alerts</span>
+                </label>
+                <label class="flex items-center gap-3 p-3 rounded-lg" style="background:var(--card-bg);border:1px solid var(--border);cursor:pointer">
+                    <input type="checkbox" name="enable_expiry_alerts" {% if sys_settings.enable_expiry_alerts %}checked{% endif %} style="width:18px;height:18px;accent-color:var(--primary)">
+                    <span class="text-sm" style="font-weight:600">Expiry Alerts</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex gap-3 mb-4">
+        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save All Settings</button>
+        <a href="{% url 'admin_panel' %}" class="btn btn-outline">Back to Admin Panel</a>
+    </div>
+</form>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load pagination_tags %}
+{% block title %}Cycle Counts{% endblock %}
+{% block page_title %}Cycle Counts{% endblock %}
+{% block content %}
+<div class="flex-between mb-4"><div></div><a href="{% url 'stock_count_create' %}" class="btn btn-primary">+ Start Count</a></div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>#</th><th>Warehouse</th><th>Status</th><th>Started By</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for s in sessions %}
+                <tr>
+                    <td style="font-weight:600">#{{ s.pk }}</td>
+                    <td>{{ s.warehouse.name }}</td>
+                    <td><span class="badge {% if s.status == 'Committed' %}badge-success{% elif s.status == 'In Progress' %}badge-warning{% else %}badge-danger{% endif %}">{{ s.status }}</span></td>
+                    <td>{{ s.started_by.username }}</td>
+                    <td class="text-sm text-muted">{{ s.started_at|date:"d M Y" }}</td>
+                    <td><a href="{% url 'stock_count_detail' s.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted" style="padding:30px">No count sessions.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination sessions %}
+{% endblock %}

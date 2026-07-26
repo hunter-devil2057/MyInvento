@@ -1,0 +1,397 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyInvento{% endblock %} | Inventory Management System</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            corePlugins: { preflight: false },
+            theme: {
+                extend: {
+                    screens: { 'xs': '480px' }
+                }
+            }
+        }
+    </script>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <aside class="sidebar fixed left-0 top-0 h-full z-50 transition-all duration-300 -translate-x-full lg:translate-x-0" id="sidebar" style="width:260px">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <h1><span class="brand-icon"><i class="fa-solid fa-briefcase"></i></span> <span class="brand-text">MyInvento</span></h1>
+                <small class="brand-sub">Inventory Management System</small>
+            </div>
+            <button class="sidebar-toggle" onclick="toggleSidebarCollapse()" title="Toggle sidebar"><i class="fa-solid fa-bars"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">Main</div>
+            <a href="{% url 'dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" data-tooltip="Dashboard">
+                <span class="nav-icon"><i class="fa-solid fa-chart-simple"></i></span> <span class="nav-text">Dashboard</span>
+            </a>
+
+            <div class="nav-section">Catalog</div>
+            <a href="{% url 'product_list' %}" class="nav-link {% if request.resolver_match.url_name in 'product_list product_detail product_edit product_create' %}active{% endif %}" data-tooltip="Products">
+                <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span> <span class="nav-text">Products</span>
+            </a>
+            <a href="{% url 'category_list' %}" class="nav-link {% if request.resolver_match.url_name in 'category_list category_create category_edit' %}active{% endif %}" data-tooltip="Categories">
+                <span class="nav-icon"><i class="fa-solid fa-folder"></i></span> <span class="nav-text">Categories</span>
+            </a>
+
+            <div class="nav-section">Inventory</div>
+            <a href="{% url 'stock_overview' %}" class="nav-link {% if request.resolver_match.url_name == 'stock_overview' %}active{% endif %}" data-tooltip="Stock Levels">
+                <span class="nav-icon"><i class="fa-solid fa-scale-balanced"></i></span> <span class="nav-text">Stock Levels</span>
+            </a>
+            <a href="{% url 'stock_adjust' %}" class="nav-link {% if request.resolver_match.url_name == 'stock_adjust' %}active{% endif %}" data-tooltip="Adjust Stock">
+                <span class="nav-icon"><i class="fa-solid fa-wrench"></i></span> <span class="nav-text">Adjust Stock</span>
+            </a>
+            <a href="{% url 'stock_transfer_list' %}" class="nav-link {% if request.resolver_match.url_name in 'stock_transfer_list stock_transfer_create' %}active{% endif %}" data-tooltip="Transfers">
+                <span class="nav-icon"><i class="fa-solid fa-right-left"></i></span> <span class="nav-text">Transfers</span>
+            </a>
+            <a href="{% url 'stock_count_list' %}" class="nav-link {% if request.resolver_match.url_name in 'stock_count_list stock_count_create' %}active{% endif %}" data-tooltip="Cycle Counts">
+                <span class="nav-icon"><i class="fa-solid fa-clipboard-list"></i></span> <span class="nav-text">Cycle Counts</span>
+            </a>
+            <a href="{% url 'stock_movement_list' %}" class="nav-link {% if request.resolver_match.url_name == 'stock_movement_list' %}active{% endif %}" data-tooltip="Movements">
+                <span class="nav-icon"><i class="fa-solid fa-arrows-spin"></i></span> <span class="nav-text">Movements</span>
+            </a>
+            <a href="{% url 'warehouse_list' %}" class="nav-link {% if request.resolver_match.url_name in 'warehouse_list warehouse_create warehouse_edit' %}active{% endif %}" data-tooltip="Warehouses">
+                <span class="nav-icon"><i class="fa-solid fa-warehouse"></i></span> <span class="nav-text">Warehouses</span>
+            </a>
+
+            <div class="nav-section">Orders</div>
+            <a href="{% url 'pos' %}" class="nav-link {% if request.resolver_match.url_name == 'pos' %}active{% endif %}" data-tooltip="POS / Sales">
+                <span class="nav-icon"><i class="fa-solid fa-cash-register"></i></span> <span class="nav-text">POS / Sales</span>
+            </a>
+            <a href="{% url 'transaction_list' %}" class="nav-link {% if request.resolver_match.url_name in 'transaction_list transaction_detail transaction_create transaction_receipt' %}active{% endif %}" data-tooltip="Transactions">
+                <span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span> <span class="nav-text">Transactions</span>
+            </a>
+            <a href="{% url 'po_list' %}" class="nav-link {% if request.resolver_match.url_name in 'po_list po_detail po_create' %}active{% endif %}" data-tooltip="Purchase Orders">
+                <span class="nav-icon"><i class="fa-solid fa-cart-shopping"></i></span> <span class="nav-text">Purchase Orders</span>
+            </a>
+            <a href="{% url 'return_list' %}" class="nav-link {% if request.resolver_match.url_name in 'return_list return_detail return_create' %}active{% endif %}" data-tooltip="Returns">
+                <span class="nav-icon"><i class="fa-solid fa-rotate-left"></i></span> <span class="nav-text">Returns</span>
+            </a>
+
+            <div class="nav-section">People</div>
+            <a href="{% url 'supplier_list' %}" class="nav-link {% if request.resolver_match.url_name in 'supplier_list supplier_detail supplier_create supplier_edit' %}active{% endif %}" data-tooltip="Suppliers">
+                <span class="nav-icon"><i class="fa-solid fa-truck"></i></span> <span class="nav-text">Suppliers</span>
+            </a>
+            <a href="{% url 'customer_list' %}" class="nav-link {% if request.resolver_match.url_name in 'customer_list customer_detail customer_create customer_edit' %}active{% endif %}" data-tooltip="Customers">
+                <span class="nav-icon"><i class="fa-solid fa-users"></i></span> <span class="nav-text">Customers</span>
+            </a>
+
+            <div class="nav-section">Insights</div>
+            <a href="{% url 'reports_home' %}" class="nav-link {% if request.resolver_match.url_name in 'reports_home report_inventory report_sales report_purchasing report_financial report_product report_stock_health' %}active{% endif %}" data-tooltip="Reports">
+                <span class="nav-icon"><i class="fa-solid fa-chart-line"></i></span> <span class="nav-text">Reports</span>
+            </a>
+            {% if user_profile and user_profile.is_admin_role %}
+            <a href="{% url 'admin_panel' %}" class="nav-link {% if request.resolver_match.url_name in 'admin_panel admin_settings admin_user_activity admin_system_health admin_quick_actions admin_complaint_list admin_complaint_detail' %}active{% endif %}" data-tooltip="Admin Panel">
+                <span class="nav-icon"><i class="fa-solid fa-screwdriver-wrench"></i></span> <span class="nav-text">Admin Panel</span>
+            </a>
+            {% endif %}
+            <a href="{% url 'audit_log' %}" class="nav-link {% if request.resolver_match.url_name == 'audit_log' %}active{% endif %}" data-tooltip="Audit Log">
+                <span class="nav-icon"><i class="fa-solid fa-pen-to-square"></i></span> <span class="nav-text">Audit Log</span>
+            </a>
+            <a href="{% url 'alert_list' %}" class="nav-link {% if request.resolver_match.url_name == 'alert_list' %}active{% endif %}" data-tooltip="Alerts">
+                <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> <span class="nav-text">Alerts</span>
+                {% if unresolved_alerts %}<span class="nav-badge">{{ unresolved_alerts }}</span>{% endif %}
+            </a>
+        </nav>
+    </aside>
+    <div class="sidebar-overlay fixed inset-0 bg-black/50 z-40 hidden" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <main class="main-content min-h-screen" id="mainContent">
+        <div class="top-bar sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 lg:py-3.5">
+            <div class="flex items-center gap-3 lg:gap-4">
+                <button class="menu-toggle lg:!hidden" onclick="toggleSidebar()" style="width:38px;height:38px;border-radius:10px;background:var(--card-bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text);cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text)'"><i class="fa-solid fa-bars"></i></button>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <a href="{% url 'notification_list' %}" class="btn btn-outline btn-sm relative" style="position:relative">
+                    <i class="fa-solid fa-bell"></i> <span class="hidden sm:inline">Notifications</span>
+                    {% if unread_notifications %}<span class="nav-badge" style="position:absolute;top:-6px;right:-6px;font-size:9px;min-width:16px;height:16px;padding:0 4px">{{ unread_notifications }}</span>{% endif %}
+                </a>
+                <button class="theme-toggle shrink-0" onclick="toggleTheme()" title="Toggle dark mode">
+                    <span class="icon-sun"><i class="fa-solid fa-sun"></i></span>
+                    <span class="icon-moon"><i class="fa-solid fa-moon"></i></span>
+                </button>
+                <div x-data="{ open: false }" class="relative">
+                    <button @click="open = !open" class="btn btn-outline btn-sm flex items-center gap-2">
+                        <span class="avatar-circle">{{ user.first_name|first|upper }}{{ user.last_name|first|upper }}</span>
+                        <span class="hidden sm:inline">{{ user.get_full_name|default:user.username }}</span>
+                        <i class="fa-solid fa-chevron-down hidden sm:inline" style="font-size:10px;opacity:.5"></i>
+                    </button>
+                    <div x-show="open" @click.away="open = false" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-95 translate-y-1" class="user-dropdown">
+                        <div style="padding:12px 16px;border-bottom:1px solid var(--border-light);font-size:13px">
+                            <div style="font-weight:700;color:var(--text)">{{ user.get_full_name|default:user.username }}</div>
+                            <div style="color:var(--text-muted);font-size:12px">{{ user.email }}</div>
+                        </div>
+                        <a href="{% url 'profile' %}" class="dropdown-item"><i class="fa-solid fa-user"></i> Profile Settings</a>
+                        <a href="{% url 'password_change' %}" class="dropdown-item"><i class="fa-solid fa-key"></i> Change Password</a>
+                        <a href="{% url 'portal_home' %}" class="dropdown-item dropdown-item-border"><i class="fa-solid fa-star"></i> Customer Portal</a>
+                        <a href="{% url 'logout' %}" class="dropdown-item dropdown-item-border dropdown-item-danger"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-header">
+            <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+        </div>
+
+        {% if messages %}
+        <div class="toast-container">
+            {% for message in messages %}
+            <div class="toast toast-{{ message.tags|default:'info' }}" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-3 scale-95" x-transition:enter-end="opacity-100 translate-y-0 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 scale-100" x-transition:leave-end="opacity-0 -translate-y-3 scale-95">
+                <div class="toast-icon">
+                    {% if message.tags == 'success' %}<i class="fa-solid fa-circle-check"></i>
+                    {% elif message.tags == 'error' %}<i class="fa-solid fa-circle-xmark"></i>
+                    {% elif message.tags == 'warning' %}<i class="fa-solid fa-triangle-exclamation"></i>
+                    {% else %}<i class="fa-solid fa-circle-info"></i>{% endif %}
+                </div>
+                <span class="toast-text">{{ message }}</span>
+                <button @click="show = false" class="toast-close"><i class="fa-solid fa-xmark"></i></button>
+                <div class="toast-progress"></div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="content-area p-3 sm:p-4 lg:p-7">
+            {% block content %}{% endblock %}
+        </div>
+        <footer class="admin-footer">
+            <p>&copy; 2026 MyInvento Inventory Management System. All rights reserved.</p>
+        </footer>
+    </main>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('hidden');
+        }
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+            window.dispatchEvent(new Event('themechange'));
+        }
+        function toggleSidebarCollapse() {
+            document.body.classList.toggle('sidebar-collapsed');
+            const collapsed = document.body.classList.contains('sidebar-collapsed');
+            localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+        }
+        (function() {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.setAttribute('data-theme', saved || (prefersDark ? 'dark' : 'light'));
+            if (localStorage.getItem('sidebarCollapsed') === '1') {
+                document.body.classList.add('sidebar-collapsed');
+            }
+        })();
+
+        /* Sidebar collapsed tooltip */
+        (function() {
+            var tip = document.createElement('div');
+            tip.className = 'sidebar-tooltip';
+            document.body.appendChild(tip);
+            document.querySelectorAll('.nav-link[data-tooltip]').forEach(function(link) {
+                link.addEventListener('mouseenter', function() {
+                    if (!document.body.classList.contains('sidebar-collapsed')) { tip.classList.remove('visible'); return; }
+                    var linkRect = link.getBoundingClientRect();
+                    var sidebar = document.getElementById('sidebar');
+                    var sidebarRect = sidebar.getBoundingClientRect();
+                    var iconEl = link.querySelector('.nav-icon i');
+                    var iconHtml = iconEl ? '<i class="' + iconEl.className + '"></i>' : '';
+                    tip.innerHTML = '<span class="sidebar-tooltip-icon">' + iconHtml + '</span><span class="sidebar-tooltip-sep"><i class="fa-solid fa-chevron-right"></i></span><span class="sidebar-tooltip-text">' + link.getAttribute('data-tooltip') + '</span>';
+                    tip.style.left = (sidebarRect.right + 10) + 'px';
+                    tip.style.top = (linkRect.top + linkRect.height / 2 - 18) + 'px';
+                    tip.classList.add('visible');
+                });
+                link.addEventListener('mouseleave', function() {
+                    tip.classList.remove('visible');
+                });
+            });
+        })();
+
+        /* Form submit loading state */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form').forEach(function(form) {
+                form.addEventListener('submit', function() {
+                    var btn = form.querySelector('button[type="submit"], input[type="submit"]');
+                    if (btn && !btn.classList.contains('loading')) {
+                        btn.classList.add('loading');
+                        btn.setAttribute('data-original-text', btn.innerHTML);
+                    }
+                });
+            });
+        });
+
+        /* Confirm dialog utility */
+        function confirmAction(message, onConfirm, icon) {
+            icon = icon || '<i class=\"fa-solid fa-triangle-exclamation\" style=\"color:var(--danger)\"></i>';
+            var overlay = document.createElement('div');
+            overlay.className = 'confirm-overlay';
+            overlay.innerHTML = '<div class="confirm-dialog">' +
+                '<span class="confirm-icon">' + icon + '</span>' +
+                '<h3>Are you sure?</h3>' +
+                '<p>' + message + '</p>' +
+                '<div class="confirm-actions">' +
+                '<button class="btn btn-secondary" onclick="this.closest(\'.confirm-overlay\').remove()">Cancel</button>' +
+                '<button class="btn btn-danger" id="confirmYesBtn">Confirm</button>' +
+                '</div></div>';
+            document.body.appendChild(overlay);
+            overlay.querySelector('#confirmYesBtn').focus();
+            overlay.querySelector('#confirmYesBtn').addEventListener('click', function() {
+                overlay.remove();
+                onConfirm();
+            });
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) overlay.remove();
+            });
+            document.addEventListener('keydown', function handler(e) {
+                if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', handler); }
+                if (e.key === 'Enter' && document.activeElement === overlay.querySelector('#confirmYesBtn')) {
+                    overlay.remove(); document.removeEventListener('keydown', handler); onConfirm();
+                }
+            });
+        }
+
+        /* Attach confirm dialogs to delete links */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[href*="delete"], a[href*="deactivate"], a[href*="archive"]').forEach(function(link) {
+                if (!link.hasAttribute('data-no-confirm')) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var href = this.getAttribute('href');
+                        confirmAction('This action cannot be undone. Do you want to proceed?', function() {
+                            window.location.href = href;
+                        });
+                    });
+                }
+            });
+        });
+
+        /* Table row click to link */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.table-clickable tbody tr[data-href]').forEach(function(row) {
+                row.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                        window.location.href = row.getAttribute('data-href');
+                    }
+                });
+            });
+        });
+
+        /* Smooth stagger-in for cards and grid items */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.stagger-in').forEach(function(container) {
+                var items = container.children;
+                for (var i = 0; i < items.length; i++) {
+                    items[i].style.animationDelay = (i * 0.06) + 's';
+                }
+            });
+        });
+
+        /* Inline form validation */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form').forEach(function(form) {
+                form.querySelectorAll('.form-input[required]').forEach(function(input) {
+                    input.addEventListener('blur', function() {
+                        if (!this.value.trim()) {
+                            this.classList.add('error');
+                            this.classList.remove('success');
+                            var err = this.parentNode.querySelector('.form-error');
+                            if (!err) {
+                                err = document.createElement('div');
+                                err.className = 'form-error';
+                                err.textContent = 'This field is required';
+                                this.parentNode.appendChild(err);
+                            }
+                        } else {
+                            this.classList.remove('error');
+                            this.classList.add('success');
+                            var err = this.parentNode.querySelector('.form-error');
+                            if (err) err.remove();
+                        }
+                    });
+                    input.addEventListener('input', function() {
+                        if (this.classList.contains('error') && this.value.trim()) {
+                            this.classList.remove('error');
+                            this.classList.add('success');
+                            var err = this.parentNode.querySelector('.form-error');
+                            if (err) err.remove();
+                        }
+                    });
+                });
+                var emailInputs = form.querySelectorAll('input[type="email"]');
+                emailInputs.forEach(function(input) {
+                    input.addEventListener('blur', function() {
+                        if (this.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value)) {
+                            this.classList.add('error');
+                            this.classList.remove('success');
+                            var err = this.parentNode.querySelector('.form-error');
+                            if (!err) {
+                                err = document.createElement('div');
+                                err.className = 'form-error';
+                                err.textContent = 'Please enter a valid email address';
+                                this.parentNode.appendChild(err);
+                            }
+                        }
+                    });
+                });
+            });
+        });
+
+        /* Password show/hide toggle */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('input[type="password"]').forEach(function(input) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'password-wrapper';
+                input.parentNode.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+                var btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'password-toggle';
+                btn.innerHTML = '<i class=\"fa-solid fa-eye\"></i>';
+                btn.title = 'Show password';
+                btn.addEventListener('click', function() {
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        btn.innerHTML = '<i class=\"fa-solid fa-eye-slash\"></i>';
+                        btn.title = 'Hide password';
+                    } else {
+                        input.type = 'password';
+                        btn.innerHTML = '<i class=\"fa-solid fa-eye\"></i>';
+                        btn.title = 'Show password';
+                    }
+                });
+                wrapper.appendChild(btn);
+            });
+        });
+
+        /* Debounced search */
+        document.addEventListener('DOMContentLoaded', function() {
+            var searchInputs = document.querySelectorAll('input[name="q"]');
+            searchInputs.forEach(function(input) {
+                var form = input.closest('form');
+                if (!form) return;
+                var timer = null;
+                input.addEventListener('input', function() {
+                    clearTimeout(timer);
+                    timer = setTimeout(function() { form.submit(); }, 600);
+                });
+            });
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

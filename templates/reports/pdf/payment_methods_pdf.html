@@ -1,0 +1,18 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Total Collected</div><div class="value green">रू {{ total_amount|floatformat:2 }}</div></div>
+    <div class="kpi-box"><div class="label">Total Payments</div><div class="value blue">{{ total_count }}</div></div>
+</div>
+<div class="section">
+<h2>Breakdown by Method</h2>
+<table>
+<thead><tr><th>Method</th><th class="text-right">Count</th><th class="text-right">Total</th><th class="text-right">Average</th></tr></thead>
+<tbody>
+{% for m in by_method %}
+<tr><td class="font-bold">{{ m.method }}</td><td class="text-right">{{ m.count }}</td><td class="text-right font-bold">रू {{ m.total|floatformat:2 }}</td><td class="text-right">रू {{ m.avg|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

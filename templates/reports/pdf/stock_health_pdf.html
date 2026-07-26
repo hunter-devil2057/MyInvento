@@ -1,0 +1,19 @@
+{% extends "reports/pdf/report_base.html" %}
+{% block pdf_content %}
+<div class="kpi-row">
+    <div class="kpi-box"><div class="label">Out of Stock</div><div class="value red">{{ out_of_stock }}</div></div>
+    <div class="kpi-box"><div class="label">Low Stock</div><div class="value">{{ low_stock }}</div></div>
+    <div class="kpi-box"><div class="label">Overstocked</div><div class="value blue">{{ overstocked }}</div></div>
+</div>
+<div class="section">
+<h2>Top Selling Products (30d)</h2>
+<table>
+<thead><tr><th>#</th><th>Product</th><th>SKU</th><th class="text-right">Qty Sold</th><th class="text-right">Revenue</th></tr></thead>
+<tbody>
+{% for p in top_sellers %}
+<tr><td>{{ forloop.counter }}</td><td class="font-bold">{{ p.product__name }}</td><td class="text-muted">{{ p.product__sku }}</td><td class="text-right">{{ p.sold }}</td><td class="text-right font-bold">रू {{ p.revenue|floatformat:2 }}</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% endblock %}

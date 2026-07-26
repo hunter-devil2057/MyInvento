@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}{{ supplier.name }}{% endblock %}
+{% block page_title %}{{ supplier.name }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'supplier_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Suppliers</a>
+    <div></div>
+    <div class="flex gap-2">
+        <a href="{% url 'supplier_edit' supplier.uuid %}" class="btn btn-primary">Edit Supplier</a>
+    </div>
+</div>
+<div class="card mb-6">
+    <div class="card-body">
+        <div class="grid-3">
+            <div><div class="kpi-label">Contact Person</div><div style="font-weight:600">{{ supplier.contact_name|default:"-" }}</div></div>
+            <div><div class="kpi-label">Email</div><div>{{ supplier.email|default:"-" }}</div></div>
+            <div><div class="kpi-label">Phone</div><div>{{ supplier.phone|default:"-" }}</div></div>
+        </div>
+        <div class="grid-3 mt-4">
+            <div><div class="kpi-label">Lead Time</div><div style="font-weight:600">{{ supplier.lead_time_days|nepali }} days</div></div>
+            <div><div class="kpi-label">On-Time %</div><div style="font-weight:600">{{ supplier.on_time_pct|nepali }}%</div></div>
+            <div><div class="kpi-label">Products</div><div style="font-weight:600">{{ supplier.active_products_count|nepali }}</div></div>
+        </div>
+    </div>
+</div>
+<div class="grid-2">
+    <div class="card">
+        <div class="card-header"><h3>Supplier Products</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>Product</th><th>Supplier SKU</th><th>Cost Price</th></tr></thead>
+                <tbody>
+                    {% for sp in products %}
+                    <tr>
+                        <td style="font-weight:600">{{ sp.product.name }}</td>
+                        <td class="text-muted">{{ sp.supplyer_sku|default:"-" }}</td>
+                        <td>रू {{ sp.cost_price|floatformat:2|nepali }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted" style="padding:20px">No products linked.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h3>Recent Purchase Orders</h3></div>
+        <div class="card-body" style="padding:0">
+            <table>
+                <thead><tr><th>PO #</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                    {% for po in purchase_orders %}
+                    <tr>
+                        <td><a href="{% url 'po_detail' po.uuid %}" style="color:var(--primary);font-weight:600;text-decoration:none">{{ po.po_number }}</a></td>
+                        <td><span class="badge badge-info">{{ po.status }}</span></td>
+                        <td class="text-sm text-muted">{{ po.order_date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted" style="padding:20px">No POs yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

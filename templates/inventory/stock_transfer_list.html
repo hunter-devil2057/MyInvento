@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load pagination_tags %}
+{% block title %}Transfers{% endblock %}
+{% block page_title %}Stock Transfers{% endblock %}
+{% block content %}
+<div class="flex-between mb-4">
+    <div></div>
+    <a href="{% url 'stock_transfer_create' %}" class="btn btn-primary">+ New Transfer</a>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>#</th><th>From</th><th>To</th><th>Status</th><th>Requested By</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for t in transfers %}
+                <tr>
+                    <td style="font-weight:600">#{{ t.pk }}</td>
+                    <td>{{ t.source_warehouse.name }}</td>
+                    <td>{{ t.destination_warehouse.name }}</td>
+                    <td><span class="badge {% if t.status == 'Received' %}badge-success{% elif t.status == 'In Transit' %}badge-info{% elif t.status == 'Cancelled' %}badge-danger{% else %}badge-secondary{% endif %}">{{ t.status }}</span></td>
+                    <td>{{ t.requested_by.username }}</td>
+                    <td class="text-sm text-muted">{{ t.requested_at|date:"d M Y" }}</td>
+                    <td><a href="{% url 'stock_transfer_detail' t.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No transfers yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination transfers %}
+{% endblock %}

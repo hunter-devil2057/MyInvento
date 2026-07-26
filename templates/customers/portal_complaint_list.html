@@ -1,0 +1,87 @@
+{% extends 'customers/portal_base.html' %}
+{% load number_tags %}
+{% block title %}Support{% endblock %}
+{% block portal_content %}
+<style>
+    .complaint-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-bottom: 12px; text-decoration: none; color: var(--text); display: flex; align-items: center; justify-content: space-between; gap: 16px; transition: all .25s cubic-bezier(.4,0,.2,1); cursor: pointer; }
+    .complaint-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+    .complaint-subject { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .complaint-meta { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .status-open { background: #dbeafe; color: #1e40af; }
+    .status-in_progress { background: #fef3c7; color: #92400e; }
+    .status-resolved { background: #dcfce7; color: #166534; }
+    .status-closed { background: #f1f5f9; color: #64748b; }
+    [data-theme="dark"] .status-open { background: #1e3a5f; color: #93c5fd; }
+    [data-theme="dark"] .status-in_progress { background: #78350f; color: #fbbf24; }
+    [data-theme="dark"] .status-resolved { background: #052e16; color: #4ade80; }
+    [data-theme="dark"] .status-closed { background: #1e293b; color: #94a3b8; }
+    .priority-low { color: #64748b; }
+    .priority-medium { color: #f59e0b; }
+    .priority-high { color: #f97316; }
+    .priority-urgent { color: #ef4444; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; background: var(--card-bg); border: 1px solid var(--border); transition: all .2s; }
+    .stat-pill:hover { border-color: var(--primary); }
+    .stat-pill.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .reply-badge { background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; font-size: 10px; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+</style>
+<div style="max-width:800px;margin:0 auto;padding:40px 32px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#f43f5e);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0"><i class="fa-solid fa-headset"></i></div>
+            <div>
+                <h1 style="font-size:26px;font-weight:800">Support Center</h1>
+                <p style="font-size:13px;color:var(--text-muted)">Submit and track your complaints</p>
+            </div>
+        </div>
+        <a href="{% url 'portal_complaint_create' %}" class="btn btn-primary" style="background:linear-gradient(135deg,#f59e0b,#f43f5e);box-shadow:0 2px 10px rgba(245,158,11,.3)"><i class="fa-solid fa-plus"></i> New Complaint</a>
+    </div>
+
+    <div class="filter-bar">
+        <a href="{% url 'portal_complaint_list' %}" class="stat-pill {% if not status_filter %}active{% endif %}"><i class="fa-solid fa-layer-group"></i> All ({{ counts.total }})</a>
+        <a href="?status=open" class="stat-pill {% if status_filter == 'open' %}active{% endif %}"><i class="fa-solid fa-circle-dot"></i> Open ({{ counts.open }})</a>
+        <a href="?status=in_progress" class="stat-pill {% if status_filter == 'in_progress' %}active{% endif %}"><i class="fa-solid fa-spinner"></i> In Progress ({{ counts.in_progress }})</a>
+        <a href="?status=resolved" class="stat-pill {% if status_filter == 'resolved' %}active{% endif %}"><i class="fa-solid fa-circle-check"></i> Resolved ({{ counts.resolved }})</a>
+    </div>
+
+    {% for complaint in complaints %}
+    <a href="{% url 'portal_complaint_detail' complaint.pk %}" class="complaint-card">
+        <div style="flex:1;min-width:0">
+            <div class="complaint-subject">
+                {{ complaint.subject }}
+                {% if complaint.replies.count %}<span class="reply-badge" style="margin-left:8px">{{ complaint.replies.count }}</span>{% endif %}
+            </div>
+            <div class="complaint-meta">
+                <span><i class="fa-solid fa-tag" style="margin-right:4px"></i>{{ complaint.get_category_display }}</span>
+                <span class="priority-{{ complaint.priority }}"><i class="fa-solid fa-flag" style="margin-right:4px"></i>{{ complaint.get_priority_display }}</span>
+                {% if complaint.order %}<span><i class="fa-solid fa-file-invoice" style="margin-right:4px"></i>{{ complaint.order.invoice_number }}</span>{% endif %}
+                <span>{{ complaint.created_at|date:"d M Y" }}</span>
+            </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+            <span class="status-{{ complaint.status }}" style="display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700">{{ complaint.get_status_display }}</span>
+        </div>
+        <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);flex-shrink:0"></i>
+    </a>
+    {% empty %}
+    <div style="text-align:center;padding:80px 20px">
+        <div style="font-size:64px;opacity:.3;margin-bottom:16px;animation:float 3s ease-in-out infinite"><i class="fa-solid fa-headset" style="color:var(--text-muted)"></i></div>
+        <h3 style="font-size:20px;font-weight:700;margin-bottom:8px">No complaints yet</h3>
+        <p style="color:var(--text-muted);margin-bottom:24px;font-size:15px">Everything looks good! If you have an issue, submit a complaint.</p>
+        <a href="{% url 'portal_complaint_create' %}" class="btn btn-primary btn-lg" style="padding:14px 32px;background:linear-gradient(135deg,#f59e0b,#f43f5e)"><i class="fa-solid fa-plus"></i> Submit Complaint</a>
+    </div>
+    {% endfor %}
+
+    {% if complaints.has_other_pages %}
+    <div class="pagination">
+        {% if complaints.has_previous %}<a href="?page={{ complaints.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn"><i class="fa-solid fa-chevron-left"></i></a>{% endif %}
+        {% for num in complaints.paginator.page_range %}
+            {% if complaints.number == num %}<span class="page-btn page-current">{{ num }}</span>
+            {% elif num > complaints.number|add:'-3' and num < complaints.number|add:'3' %}<a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn">{{ num }}</a>
+            {% elif num == complaints.number|add:'-3' or num == complaints.number|add:'3' %}<span class="page-ellipsis">&hellip;</span>{% endif %}
+        {% endfor %}
+        {% if complaints.has_next %}<a href="?page={{ complaints.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-btn"><i class="fa-solid fa-chevron-right"></i></a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

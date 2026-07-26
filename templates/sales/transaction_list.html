@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% load pagination_tags %}
+{% block title %}Transactions{% endblock %}
+{% block page_title %}Sales Transactions{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:center;margin-bottom:24px">
+    <form method="get" class="search-box" style="width:320px;max-width:100%"><input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search transactions..." style="text-align:center"></form>
+</div>
+<div class="flex-between mb-4">
+    <div class="flex gap-2">
+        <a href="?status=" class="btn btn-sm {% if not selected_status %}btn-primary{% else %}btn-outline{% endif %}">All</a>
+        <a href="?status=Draft" class="btn btn-sm {% if selected_status == 'Draft' %}btn-primary{% else %}btn-outline{% endif %}">Draft</a>
+        <a href="?status=Completed" class="btn btn-sm {% if selected_status == 'Completed' %}btn-primary{% else %}btn-outline{% endif %}">Completed</a>
+    </div>
+    <div class="flex gap-2">
+        <a href="{% url 'pos' %}" class="btn btn-primary">Open POS</a>
+        <a href="{% url 'export_csv' 'transactions' %}" class="btn btn-outline">Export CSV</a>
+    </div>
+</div>
+<div class="card">
+    <div class="table-container">
+        <table>
+            <thead><tr><th>Invoice</th><th>Customer</th><th>Channel</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for t in transactions %}
+                <tr>
+                    <td><a href="{% url 'transaction_detail' t.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ t.invoice_number|default:"Draft" }}</a></td>
+                    <td>{{ t.customer|default:"Walk-in" }}</td>
+                    <td class="text-sm">{{ t.channel }}</td>
+                    <td style="font-weight:600">रू {{ t.grand_total|floatformat:2|nepali }}</td>
+                    <td><span class="badge {% if t.status == 'Completed' %}badge-success{% elif t.status == 'Draft' %}badge-secondary{% elif t.status == 'Void' %}badge-danger{% else %}badge-warning{% endif %}">{{ t.status }}</span></td>
+                    <td class="text-sm text-muted">{{ t.created_at|date:"d M Y H:i" }}</td>
+                    <td><a href="{% url 'transaction_detail' t.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-file-invoice"></i></span><h3>No transactions yet</h3><p>Complete your first sale to see transactions here.</p><a href="{% url 'pos' %}" class="btn btn-primary mt-2">Open POS</a></div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% smart_pagination transactions status=selected_status q=query %}
+{% endblock %}

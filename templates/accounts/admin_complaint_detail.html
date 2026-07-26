@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load number_tags %}
+{% block title %}Complaint #{{ complaint.pk }}{% endblock %}
+{% block page_title %}Complaint #{{ complaint.pk }}{% endblock %}
+{% block content %}
+<div class="flex-between mb-6">
+    <a href="{% url 'admin_complaint_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Complaints</a>
+    <div></div>
+    <div></div>
+</div>
+<div class="grid-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-header"><h3><i class="fa-solid fa-circle-info"></i> Complaint Details</h3></div>
+        <div class="card-body">
+            <div class="mb-4">
+                <div class="text-sm text-muted" style="margin-bottom:4px">Subject</div>
+                <div style="font-size:18px;font-weight:700">{{ complaint.subject }}</div>
+            </div>
+            <div class="grid-2 gap-4 mb-4">
+                <div>
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Category</div>
+                    <span class="badge badge-info">{{ complaint.get_category_display }}</span>
+                </div>
+                <div>
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Priority</div>
+                    <span class="badge {% if complaint.priority == 'urgent' %}badge-danger{% elif complaint.priority == 'high' %}badge-warning{% elif complaint.priority == 'medium' %}badge-info{% else %}badge-secondary{% endif %}">{{ complaint.get_priority_display }}</span>
+                </div>
+                <div>
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Status</div>
+                    <span class="badge status-{{ complaint.status }}">{{ complaint.get_status_display }}</span>
+                </div>
+                <div>
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Submitted</div>
+                    <div class="text-sm" style="font-weight:600">{{ complaint.created_at|date:"d M Y, g:i A" }}</div>
+                </div>
+            </div>
+            {% if complaint.order %}
+            <div class="mb-4">
+                <div class="text-sm text-muted" style="margin-bottom:4px">Related Order</div>
+                <div class="text-sm" style="font-weight:600"><i class="fa-solid fa-file-invoice" style="color:var(--primary);margin-right:4px"></i>{{ complaint.order.invoice_number }}</div>
+            </div>
+            {% endif %}
+            {% if complaint.product %}
+            <div class="mb-4">
+                <div class="text-sm text-muted" style="margin-bottom:4px">Related Product</div>
+                <div class="text-sm" style="font-weight:600"><i class="fa-solid fa-box" style="color:var(--primary);margin-right:4px"></i>{{ complaint.product.name }}</div>
+            </div>
+            {% endif %}
+            <div>
+                <div class="text-sm text-muted" style="margin-bottom:6px">Description</div>
+                <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:10px;padding:16px;font-size:14px;line-height:1.7;white-space:pre-wrap">{{ complaint.description }}</div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="card mb-4">
+            <div class="card-header"><h3><i class="fa-solid fa-user"></i> Customer</h3></div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Name</div>
+                    <div style="font-weight:600">{{ complaint.user.get_full_name|default:complaint.user.username }}</div>
+                </div>
+                <div class="mb-4">
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Email</div>
+                    <div class="text-sm">{{ complaint.user.email }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-muted" style="margin-bottom:4px">Member Since</div>
+                    <div class="text-sm">{{ complaint.user.date_joined|date:"d M Y" }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header"><h3><i class="fa-solid fa-gear"></i> Update Status</h3></div>
+            <div class="card-body">
+                <form method="post">{% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    <div class="form-group">
+                        <select name="new_status" class="form-input">
+                            <option value="open" {% if complaint.status == 'open' %}selected{% endif %}>Open</option>
+                            <option value="in_progress" {% if complaint.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="resolved" {% if complaint.status == 'resolved' %}selected{% endif %}>Resolved</option>
+                            <option value="closed" {% if complaint.status == 'closed' %}selected{% endif %}>Closed</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="width:100%"><i class="fa-solid fa-check"></i> Update Status</button>
+                </form>
+            </div>
+        </div>
+        {% if complaint.admin_response %}
+        <div class="card mb-4" style="border-left:3px solid #6366f1">
+            <div class="card-body">
+                <div class="text-sm text-muted" style="margin-bottom:6px"><i class="fa-solid fa-shield-halved" style="color:#6366f1;margin-right:4px"></i>Admin Response</div>
+                <div style="font-size:14px;line-height:1.7;white-space:pre-wrap">{{ complaint.admin_response }}</div>
+                {% if complaint.responded_by %}
+                <div class="text-sm text-muted" style="margin-top:8px">— {{ complaint.responded_by.get_full_name|default:complaint.responded_by.username }} on {{ complaint.responded_at|date:"d M Y, g:i A" }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        <div class="card mb-4">
+            <div class="card-header"><h3><i class="fa-solid fa-pen"></i> Admin Response</h3></div>
+            <div class="card-body">
+                <form method="post">{% csrf_token %}
+                    <input type="hidden" name="action" value="admin_response">
+                    <div class="form-group">
+                        <textarea name="admin_response" class="form-input" rows="4" placeholder="Write your official response to the customer..." style="resize:vertical">{{ complaint.admin_response }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="width:100%"><i class="fa-solid fa-paper-plane"></i> Save Response</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-4">
+    <div class="card-header"><h3><i class="fa-solid fa-comments"></i> Conversation ({{ replies|length }})</h3></div>
+    <div class="card-body">
+        {% for reply in replies %}
+        <div style="display:flex;gap:12px;margin-bottom:16px">
+            <div style="width:36px;height:36px;border-radius:10px;background:{% if reply.user.is_staff %}linear-gradient(135deg,#6366f1,#a855f7){% else %}linear-gradient(135deg,#10b981,#06b6d4){% endif %};display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;flex-shrink:0">
+                {% if reply.user.is_staff %}<i class="fa-solid fa-shield-halved"></i>{% else %}{{ reply.user.first_name.0|default:"U" }}{% endif %}
+            </div>
+            <div style="flex:1;background:var(--card-bg);border:1px solid var(--border);border-left:3px solid {% if reply.user.is_staff %}#6366f1{% else %}#10b981{% endif %};border-radius:10px;padding:12px 16px">
+                <div class="text-sm text-muted" style="margin-bottom:4px;font-weight:600">{{ reply.user.get_full_name|default:reply.user.username }} &middot; {{ reply.created_at|date:"d M Y, g:i A" }}</div>
+                <div style="font-size:14px;line-height:1.7">{{ reply.message }}</div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center text-muted" style="padding:24px">No replies yet.</p>
+        {% endfor %}
+        <form method="post" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">{% csrf_token %}
+            <input type="hidden" name="action" value="reply">
+            <div class="form-group">
+                <textarea name="message" class="form-input" rows="3" placeholder="Type your reply..." required style="resize:vertical"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-reply"></i> Send Reply</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

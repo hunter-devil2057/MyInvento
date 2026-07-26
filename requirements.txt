@@ -1,0 +1,13 @@
+django>=4.2,<7.0
+djangorestframework>=3.14
+django-cors-headers>=4.3
+drf-spectacular>=0.27
+Pillow>=10.0
+xhtml2pdf>=0.2.11
+python-barcode>=0.15
+qrcode>=7.4
+django-cleanup>=8.0
+dj-database-url>=2.1
+whitenoise>=6.5
+requests>=2.31
+python-dotenv
