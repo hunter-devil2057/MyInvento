@@ -2,7 +2,11 @@
 
 **A full-featured, production-ready Inventory Management System built with Django.**
 
-MyInvento streamlines warehouse operations, sales, purchasing, and customer engagement through a single unified platform with role-based access, real-time stock tracking, PDF reports, REST APIs, and a comprehensive notification system.
+MyInvento is a centralized platform designed to manage every aspect of inventory operations — from procurement and warehousing to sales and customer engagement. It eliminates manual tracking overhead by automating stock updates, purchase workflows, and order fulfillment while providing full visibility across all operations through real-time dashboards and detailed PDF reports.
+
+Built with a role-based architecture, MyInvento ensures that administrators, warehouse managers, purchase managers, sales staff, and customers each see exactly what they need — nothing more, nothing less. Every action in the system — whether it's a stock adjustment, a purchase order approval, or a new sale — automatically generates notifications that keep stakeholders informed and link directly to the relevant context.
+
+Whether you're running a single warehouse or coordinating across multiple locations, MyInvento provides the tools to track stock in real time, process sales through a built-in POS interface, manage supplier relationships, handle customer complaints, and generate actionable reports — all from a single application.
 
 ---
 
@@ -24,15 +28,15 @@ MyInvento streamlines warehouse operations, sales, purchasing, and customer enga
 
 ## Tech Stack
 
-| Layer          | Technology                                          |
-|----------------|-----------------------------------------------------|
-| Backend        | Django 6.0.7, Python 3.14.4                         |
-| Database       | SQLite (switchable to PostgreSQL)                   |
-| Frontend       | HTML5, CSS3, JavaScript, Tailwind CSS utilities     |
-| API            | Django REST Framework, django-filter                |
-| PDF Generation | ReportLab                                           |
-| Image Handling | Pillow, django-cleanup                              |
-| Deployment     | Vercel, Whitenoise (static files), Gunicorn         |
+| Layer          | Technology                                      |
+| -------------- | ----------------------------------------------- |
+| Backend        | Django 6.0.7, Python 3.14.4                     |
+| Database       | SQLite (switchable to PostgreSQL)               |
+| Frontend       | HTML5, CSS3, JavaScript, Tailwind CSS utilities |
+| API            | Django REST Framework, django-filter            |
+| PDF Generation | ReportLab                                       |
+| Image Handling | Pillow, django-cleanup                          |
+| Deployment     | Vercel, Whitenoise (static files), Gunicorn     |
 
 ---
 
@@ -113,21 +117,21 @@ EMAIL_HOST_PASSWORD=your-app-password
 
 Once the server starts, access the application at:
 
-| Page              | URL                                    |
-|-------------------|----------------------------------------|
-| Main Application  | http://localhost:8000/                  |
-| Customer Portal   | http://localhost:8000/portal/           |
-| Admin Panel       | http://localhost:8000/admin/            |
-| REST API          | http://localhost:8000/api/              |
+| Page             | URL                           |
+| ---------------- | ----------------------------- |
+| Main Application | http://localhost:8000/        |
+| Customer Portal  | http://localhost:8000/portal/ |
+| Admin Panel      | http://localhost:8000/admin/  |
+| REST API         | http://localhost:8000/api/    |
 
 ### Default Login Credentials
 
-| Role               | Username     | Password    |
-|--------------------|-------------|-------------|
-| Administrator      | admin       | admin123    |
-| Warehouse Manager  | warehouse   | warehouse   |
-| Sales Staff        | sales       | sales123    |
-| Purchase Manager   | purchase    | purchase123 |
+| Role              | Username  | Password    |
+| ----------------- | --------- | ----------- |
+| Administrator     | admin     | admin123    |
+| Warehouse Manager | warehouse | warehouse   |
+| Sales Staff       | sales     | sales123    |
+| Purchase Manager  | purchase  | purchase123 |
 
 ---
 
@@ -279,33 +283,37 @@ MyInvento/
 ## API Reference
 
 ### Products
-| Method   | Endpoint                | Description              |
-|----------|-------------------------|--------------------------|
-| `GET`    | `/api/products/`        | List all products        |
-| `POST`   | `/api/products/`        | Create a new product     |
-| `GET`    | `/api/products/{id}/`   | Retrieve product details |
-| `PUT`    | `/api/products/{id}/`   | Update a product         |
-| `DELETE` | `/api/products/{id}/`   | Delete a product         |
+
+| Method   | Endpoint              | Description              |
+| -------- | --------------------- | ------------------------ |
+| `GET`    | `/api/products/`      | List all products        |
+| `POST`   | `/api/products/`      | Create a new product     |
+| `GET`    | `/api/products/{id}/` | Retrieve product details |
+| `PUT`    | `/api/products/{id}/` | Update a product         |
+| `DELETE` | `/api/products/{id}/` | Delete a product         |
 
 ### Stock Levels
-| Method   | Endpoint                    | Description               |
-|----------|-----------------------------|---------------------------|
-| `GET`    | `/api/stock-levels/`        | List all stock levels     |
-| `POST`   | `/api/stock-levels/`        | Create a stock entry      |
-| `GET`    | `/api/stock-levels/{id}/`   | Retrieve stock details    |
+
+| Method | Endpoint                  | Description            |
+| ------ | ------------------------- | ---------------------- |
+| `GET`  | `/api/stock-levels/`      | List all stock levels  |
+| `POST` | `/api/stock-levels/`      | Create a stock entry   |
+| `GET`  | `/api/stock-levels/{id}/` | Retrieve stock details |
 
 ### Purchase Orders
-| Method   | Endpoint                       | Description                 |
-|----------|--------------------------------|-----------------------------|
-| `GET`    | `/api/purchase-orders/`        | List all purchase orders    |
-| `POST`   | `/api/purchase-orders/`        | Create a purchase order     |
-| `GET`    | `/api/purchase-orders/{id}/`   | Retrieve order details      |
+
+| Method | Endpoint                     | Description              |
+| ------ | ---------------------------- | ------------------------ |
+| `GET`  | `/api/purchase-orders/`      | List all purchase orders |
+| `POST` | `/api/purchase-orders/`      | Create a purchase order  |
+| `GET`  | `/api/purchase-orders/{id}/` | Retrieve order details   |
 
 ### Sales
-| Method   | Endpoint                | Description              |
-|----------|-------------------------|--------------------------|
-| `GET`    | `/api/sales/`           | List all sales           |
-| `POST`   | `/api/sales/`           | Create a new sale        |
+
+| Method | Endpoint      | Description       |
+| ------ | ------------- | ----------------- |
+| `GET`  | `/api/sales/` | List all sales    |
+| `POST` | `/api/sales/` | Create a new sale |
 
 ---
 
@@ -334,24 +342,14 @@ DATABASES = {
 
 ---
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
-
----
-
 ## Contact
 
 **Manish Shiwakoti**
 
-| Platform   | Link                                                          |
-|------------|---------------------------------------------------------------|
-| Email      | [manishshiwakoti42@gmail.com](mailto:manishshiwakoti42@gmail.com) |
-| Phone      | +977-9866556820                                               |
-| GitHub     | [hunter-devil2057](https://github.com/hunter-devil2057/)     |
-| LinkedIn   | [Manish Shiwakoti](https://www.linkedin.com/in/manish-shiwakoti-01721b260) |
-| Instagram  | [@shiwakoti.manish](https://www.instagram.com/shiwakoti.manish/) |
+| Platform  | Link                                                                       |
+| --------- | -------------------------------------------------------------------------- |
+| Email     | [manishshiwakoti42@gmail.com](mailto:manishshiwakoti42@gmail.com)          |
+| Phone     | +977-9866556820                                                            |
+| GitHub    | [hunter-devil2057](https://github.com/hunter-devil2057/)                   |
+| LinkedIn  | [Manish Shiwakoti](https://www.linkedin.com/in/manish-shiwakoti-01721b260) |
+| Instagram | [@shiwakoti.manish](https://www.instagram.com/shiwakoti.manish/)           |
