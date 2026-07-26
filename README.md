@@ -36,7 +36,7 @@ Whether you're running a single warehouse or coordinating across multiple locati
 | API            | Django REST Framework, django-filter            |
 | PDF Generation | ReportLab                                       |
 | Image Handling | Pillow, django-cleanup                          |
-| Deployment     | Vercel, Whitenoise (static files), Gunicorn     |
+| Deployment     | Whitenoise (static files), Gunicorn                  |
 
 ---
 
@@ -266,13 +266,8 @@ MyInvento/
 │   ├── package.json
 │   └── vite.config.js
 │
-├── api/                            # Vercel serverless entry point
-│   └── index.py                    # WSGI handler for Vercel deployment
-│
 ├── manage.py                       # Django management script
 ├── requirements.txt                # Python dependencies
-├── runtime.txt                     # Python runtime version (for Vercel)
-├── build_files.sh                  # Vercel build script
 ├── .env                            # Environment variables (not committed)
 ├── .gitignore                      # Git ignore rules
 └── README.md                       # This file
