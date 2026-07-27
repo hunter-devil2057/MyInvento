@@ -3,7 +3,7 @@
 {% block title %}Warehouses{% endblock %}
 {% block page_title %}Warehouses{% endblock %}
 {% block content %}
-<div class="flex-between mb-4"><div></div><a href="{% url 'warehouse_create' %}" class="btn btn-primary">+ Add Warehouse</a></div>
+<div class="flex-between mb-4"><div></div><a href="{% url 'warehouse_create' %}" class="btn btn-success">+ Add Warehouse</a></div>
 <div class="card">
     <div class="table-container">
         <table>
@@ -14,7 +14,7 @@
                     <td style="font-weight:600">{{ w.name }}</td>
                     <td class="text-muted">{{ w.address|default:"-"|truncatechars:50 }}</td>
                     <td>{% if w.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Inactive</span>{% endif %}</td>
-                    <td class="flex gap-2"><a href="{% url 'warehouse_edit' w.uuid %}" class="btn btn-outline btn-sm">Edit</a><a href="{% url 'warehouse_delete' w.uuid %}" class="btn btn-danger btn-sm">Archive</a></td>
+                    <td class="flex gap-2"><a href="{% url 'warehouse_edit' w.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a><a href="{% url 'warehouse_delete' w.uuid %}" class="btn btn-danger btn-sm">Archive</a></td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="4"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-warehouse"></i></span><h3>No warehouses yet</h3><p>Set up warehouses to track stock locations.</p><a href="{% url 'warehouse_create' %}" class="btn btn-primary mt-2">+ Add Warehouse</a></div></td></tr>

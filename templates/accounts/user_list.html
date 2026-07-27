@@ -61,7 +61,7 @@
 <div class="um-toolbar">
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <a href="{% url 'admin_panel' %}" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Admin Panel</a>
-        <a href="{% url 'register' %}" class="btn btn-primary"><i class="fa-solid fa-user-plus"></i> Add User</a>
+        <a href="{% url 'register' %}" class="btn btn-success"><i class="fa-solid fa-user-plus"></i> Add User</a>
     </div>
     <div class="um-stats">
         <div class="um-stat"><i class="fa-solid fa-users" style="color:var(--primary)"></i> <strong>{{ users.paginator.count }}</strong> Users</div>
@@ -158,7 +158,7 @@
                 <td>
                     <div class="um-actions" style="justify-content:flex-end">
                         <a href="{% url 'user_detail' u.pk %}" class="btn btn-outline btn-sm" title="View"><i class="fa-solid fa-eye"></i></a>
-                        <a href="{% url 'user_edit' u.pk %}" class="btn btn-outline btn-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
+                        <a href="{% url 'user_edit' u.pk %}" class="btn btn-success btn-sm" title="Edit"><i class="fa-solid fa-pen"></i></a>
                         {% if u.is_superuser %}
                         <span class="btn btn-sm" style="opacity:.3;cursor:not-allowed;color:#f59e0b;border:1px solid rgba(245,158,11,.3);background:transparent" title="Main admin - protected"><i class="fa-solid fa-shield-halved"></i></span>
                         {% else %}

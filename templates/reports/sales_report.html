@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Sales Report{% endblock %}
-{% block page_title %}Sales Report{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+    <a href="{% url 'reports_home' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+    <h1 class="form-header-title"><i class="fa-solid fa-money-bill-trend-up" style="color:var(--primary);margin-right:8px"></i>Sales Report</h1>
 </div>
 <div class="flex-between mb-4">
     <div class="flex gap-2" style="flex-wrap:wrap">
@@ -20,6 +28,8 @@
 <div class="kpi-grid stagger-in">
     <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Sales ({{ days }}d)</div><div class="kpi-value">रू {{ total_sales|floatformat:0|nepali }}</div></div></div>
     <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-file-invoice"></i></div><div class="kpi-info"><div class="kpi-label">Total Transactions</div><div class="kpi-value">{{ total_transactions|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-receipt"></i></div><div class="kpi-info"><div class="kpi-label">Avg Order Value</div><div class="kpi-value">रू {{ avg_order_value|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-users"></i></div><div class="kpi-info"><div class="kpi-label">Unique Customers</div><div class="kpi-value">{{ unique_customers|nepali }}</div></div></div>
 </div>
 <div class="grid-2 mb-6">
     <div class="card"><div class="card-header"><h3>Sales Trend</h3></div><div class="card-body"><canvas id="salesTrendChart" height="200"></canvas></div></div>

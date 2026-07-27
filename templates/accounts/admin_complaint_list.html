@@ -1,8 +1,19 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Customer Complaints{% endblock %}
-{% block page_title %}Customer Complaints{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'admin_panel' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <h1 class="form-header-title"><i class="fa-solid fa-headset" style="color:var(--primary);margin-right:8px"></i> Customer Complaints</h1>
+</div>
 <style>
     .status-open { background: #dbeafe; color: #1e40af; }
     .status-in_progress { background: #fef3c7; color: #92400e; }

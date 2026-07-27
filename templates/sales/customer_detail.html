@@ -1,25 +1,36 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}{{ customer.name }}{% endblock %}
-{% block page_title %}Customer: {{ customer.name }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    <a href="{% url 'customer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Customers</a>
-    <div></div>
-    <div class="flex gap-2">
-        <a href="{% url 'customer_edit' customer.uuid %}" class="btn btn-primary">Edit</a>
-        {% if request.user.is_superuser or request.user.profile.role == 'admin' %}
-        <form method="post" action="{% url 'customer_delete' customer.uuid %}" style="display:inline" onsubmit="return confirm('Delete customer {{ customer.name }}? This cannot be undone.')">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger"><i class="fa-solid fa-trash-can"></i> Delete</button>
-        </form>
-        {% endif %}
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+    .form-header-row { display: flex; align-items: center; justify-content: space-between; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'customer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <div class="form-header-row">
+        <div></div>
+        <h1 class="form-header-title" style="flex:1">{{ customer.name }}</h1>
+        <div class="flex gap-2">
+            <a href="{% url 'customer_edit' customer.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
+            {% if request.user.is_superuser or request.user.profile.role == 'admin' %}
+            <form method="post" action="{% url 'customer_delete' customer.uuid %}" style="display:inline" onsubmit="return confirm('Delete customer {{ customer.name }}? This cannot be undone.')">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash-can"></i> Delete</button>
+            </form>
+            {% endif %}
+        </div>
     </div>
 </div>
 <div class="grid-3 mb-6">
-    <div class="card"><div class="card-body"><div class="kpi-label">Email</div><div>{{ customer.email|default:"-" }}</div></div></div>
-    <div class="card"><div class="card-body"><div class="kpi-label">Phone</div><div>{{ customer.phone|default:"-" }}</div></div></div>
-    <div class="card"><div class="card-body"><div class="kpi-label">Total Orders</div><div style="font-size:20px;font-weight:700">{{ transactions.count|nepali }}</div></div></div>
+    <div class="card"><div class="card-body" style="text-align:center"><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dbeafe;color:#2563eb"><i class="fa-solid fa-envelope"></i></div><div class="kpi-label">Email</div><div style="font-weight:600">{{ customer.email|default:"-" }}</div></div></div>
+    <div class="card"><div class="card-body" style="text-align:center"><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dcfce7;color:#16a34a"><i class="fa-solid fa-phone"></i></div><div class="kpi-label">Phone</div><div style="font-weight:600">{{ customer.phone|default:"-" }}</div></div></div>
+    <div class="card"><div class="card-body" style="text-align:center"><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#fae8ff;color:#9333ea"><i class="fa-solid fa-bag-shopping"></i></div><div class="kpi-label">Total Orders</div><div style="font-size:20px;font-weight:700">{{ transactions.count|nepali }}</div></div></div>
 </div>
 <div class="card">
     <div class="card-header"><h3>Purchase History</h3></div>

@@ -406,7 +406,7 @@ def portal_khalti_callback_view(request):
         more_items = f' (+{transaction.lines.count() - 10} more)' if transaction.lines.count() > 10 else ''
         notify_admins(
             title=f'Online Order (Khalti): {transaction.invoice_number}',
-            body=f'Online order {transaction.invoice_number} paid via Khalti. Amount: Rs. {transaction.grand_total:,.2f}. Khalti transaction ID: {result.get("transaction_id", "N/A")}. Customer: "{customer.name}". Items ({transaction.lines.count()}): {items_list}{more_items}. Warehouse: {transaction.warehouse.name}.',
+            body=f'Online order {transaction.invoice_number} paid via Khalti. Amount: Rs. {transaction.grand_total:,.2f}. Khalti transaction ID: {result.get("transaction_id", "N/A")}. Customer: "{transaction.customer.name if transaction.customer else "Guest"}". Items ({transaction.lines.count()}): {items_list}{more_items}. Warehouse: {transaction.warehouse.name}.',
             link=f'/sales/{transaction.uuid}/',
         )
         cart = _get_cart(request)
@@ -549,9 +549,23 @@ def portal_complaint_create_view(request):
                    f'Complaint submitted: {complaint.subject}',
                    ip_address=request.META.get('REMOTE_ADDR'))
         from notifications.utils import notify_admins
+        from sales.models import SalesTransaction
+        from django.db.models import Sum, Count
+        order_count = SalesTransaction.objects.filter(customer__user=request.user, status='Completed').count()
+        total_spent = SalesTransaction.objects.filter(customer__user=request.user, status='Completed').aggregate(total=Sum('grand_total'))['total'] or 0
+        complaint_count = Complaint.objects.filter(user=request.user).count()
+        member_days = (timezone.now() - request.user.date_joined).days
+        customer_name = request.user.get_full_name() or request.user.username
         notify_admins(
             title=f'New Complaint: {complaint.subject}',
-            body=f'Customer "{request.user.get_full_name() or request.user.username}" (email: {request.user.email or "N/A"}) submitted a {complaint.priority} priority complaint in category "{complaint.get_category_display()}". Subject: {complaint.subject}. Description preview: "{description[:150]}{"..." if len(description) > 150 else ""}"',
+            body=(
+                f'Customer: {customer_name} (email: {request.user.email or "N/A"}) '
+                f'— Member for {member_days} days, {order_count} orders completed, रू {total_spent:,.2f} total spent, '
+                f'{complaint_count} complaint(s) filed. '
+                f'Priority: {complaint.get_priority_display()} | Category: {complaint.get_category_display()}. '
+                f'Subject: {complaint.subject}. '
+                f'Description: "{description[:150]}{"..." if len(description) > 150 else ""}"'
+            ),
             link=f'/admin-panel/complaints/{complaint.pk}/',
         )
         messages.success(request, 'Complaint submitted successfully. Our team will review it shortly.')

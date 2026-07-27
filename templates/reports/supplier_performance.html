@@ -1,10 +1,24 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Supplier Performance{% endblock %}
-{% block page_title %}Supplier Performance{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+    <a href="{% url 'reports_home' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+    <h1 class="form-header-title"><i class="fa-solid fa-truck-fast" style="color:var(--primary);margin-right:8px"></i>Supplier Performance</h1>
+</div>
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-truck"></i></div><div class="kpi-info"><div class="kpi-label">Total Suppliers</div><div class="kpi-value">{{ total_suppliers|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Spend</div><div class="kpi-value">रू {{ total_spend|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-clock"></i></div><div class="kpi-info"><div class="kpi-label">Avg Lead Time</div><div class="kpi-value">{{ avg_lead|floatformat:0|nepali }} days</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-circle-check"></i></div><div class="kpi-info"><div class="kpi-label">Avg On-Time %</div><div class="kpi-value">{{ avg_on_time|floatformat:1|nepali }}%</div></div></div>
 </div>
 <div class="card mb-4">
     <div class="card-body" style="padding:0">

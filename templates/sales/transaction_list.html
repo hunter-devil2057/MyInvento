@@ -14,7 +14,7 @@
         <a href="?status=Completed" class="btn btn-sm {% if selected_status == 'Completed' %}btn-primary{% else %}btn-outline{% endif %}">Completed</a>
     </div>
     <div class="flex gap-2">
-        <a href="{% url 'pos' %}" class="btn btn-primary">Open POS</a>
+        <a href="{% url 'pos' %}" class="btn btn-success"><i class="fa-solid fa-cash-register"></i> Open POS</a>
         <a href="{% url 'export_csv' 'transactions' %}" class="btn btn-outline">Export CSV</a>
     </div>
 </div>
@@ -31,10 +31,10 @@
                     <td style="font-weight:600">रू {{ t.grand_total|floatformat:2|nepali }}</td>
                     <td><span class="badge {% if t.status == 'Completed' %}badge-success{% elif t.status == 'Draft' %}badge-secondary{% elif t.status == 'Void' %}badge-danger{% else %}badge-warning{% endif %}">{{ t.status }}</span></td>
                     <td class="text-sm text-muted">{{ t.created_at|date:"d M Y H:i" }}</td>
-                    <td><a href="{% url 'transaction_detail' t.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                    <td><a href="{% url 'transaction_detail' t.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-eye"></i> View</a></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-file-invoice"></i></span><h3>No transactions yet</h3><p>Complete your first sale to see transactions here.</p><a href="{% url 'pos' %}" class="btn btn-primary mt-2">Open POS</a></div></td></tr>
+                    <tr><td colspan="7"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-file-invoice"></i></span><h3>No transactions yet</h3><p>Complete your first sale to see transactions here.</p><a href="{% url 'pos' %}" class="btn btn-success mt-2"><i class="fa-solid fa-cash-register"></i> Open POS</a></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>

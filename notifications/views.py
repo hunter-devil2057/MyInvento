@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Max
+from django.http import JsonResponse
 from django.utils import timezone
 from django.core.exceptions import ValidationError
 from .models import Notification, Alert
@@ -10,6 +11,239 @@ from inventory.models import (StockLevel, StockTransfer, StockTransferLine,
 from purchasing.models import PurchaseOrder, PurchaseOrderLine, ReorderRule
 from audit.utils import log_action
 import datetime
+
+
+@login_required
+def notification_api_recent_view(request):
+    notifs = list(Notification.objects.filter(user=request.user).order_by('-created_at')[:30])
+    recent_alerts = list(Alert.objects.order_by('-created_at')[:50])
+
+    all_items = []
+    for n in notifs:
+        severity = _notif_severity(n.title)
+        category = _notif_category(n.title)
+        all_items.append({
+            'id': f'n-{n.pk}',
+            'title': n.title,
+            'body': n.body,
+            'link': n.link or '/notifications/',
+            'is_read': n.is_read,
+            '_dt': n.created_at,
+            'severity': severity,
+            'category': category,
+            'icon': _notif_detail_icon(n.title),
+            'icon_bg': _notif_detail_icon_bg(n.title),
+            'icon_color': _notif_detail_icon_color(n.title),
+            'source': 'notification',
+        })
+    for a in recent_alerts:
+        title = f'[{a.severity}] {a.alert_type}: {a.message[:80]}'
+        sev = a.severity.lower() if a.severity else 'info'
+        if sev == 'critical':
+            icon = 'fa-solid fa-triangle-exclamation'
+            icon_bg = '#fef2f2'
+            icon_color = '#dc2626'
+        elif sev == 'warning':
+            icon = 'fa-solid fa-circle-exclamation'
+            icon_bg = '#fffbeb'
+            icon_color = '#d97706'
+        else:
+            icon = 'fa-solid fa-circle-info'
+            icon_bg = '#eff6ff'
+            icon_color = '#2563eb'
+        all_items.append({
+            'id': f'a-{a.pk}',
+            'title': title,
+            'body': a.message,
+            'link': '/notifications/alerts/',
+            'is_read': a.is_resolved,
+            '_dt': a.created_at,
+            'severity': sev,
+            'category': 'Inventory',
+            'icon': icon,
+            'icon_bg': icon_bg,
+            'icon_color': icon_color,
+            'source': 'alert',
+        })
+
+    all_items.sort(key=lambda x: x['_dt'], reverse=True)
+
+    data = []
+    for item in all_items:
+        item['created_at'] = _time_ago(item['_dt'])
+        del item['_dt']
+        data.append(item)
+
+    unread_count = Notification.objects.filter(user=request.user, is_read=False).count() + Alert.objects.filter(is_resolved=False).count()
+    return JsonResponse({'notifications': data, 'unread_count': unread_count})
+
+
+def _notif_severity(title):
+    t = title.lower()
+    if 'out of stock' in t or 'critical' in t:
+        return 'critical'
+    if 'low stock' in t or 'warning' in t:
+        return 'warning'
+    if 'resolved' in t or 'completed' in t or 'success' in t:
+        return 'success'
+    return 'info'
+
+
+def _notif_detail_icon(title):
+    t = title.lower()
+    if 'out of stock' in t:
+        return 'fa-solid fa-box-archive'
+    if 'low stock' in t:
+        return 'fa-solid fa-triangle-exclamation'
+    if 'transfer' in t:
+        return 'fa-solid fa-truck-moving'
+    if 'purchase order' in t or t.startswith('po ') or 'receiving' in t:
+        return 'fa-solid fa-file-invoice'
+    if 'sale' in t or 'order' in t or 'invoice' in t:
+        return 'fa-solid fa-cart-shopping'
+    if 'return' in t:
+        return 'fa-solid fa-rotate-left'
+    if 'complaint' in t or 'support' in t:
+        return 'fa-solid fa-headset'
+    if 'user' in t or 'account' in t or 'role' in t:
+        return 'fa-solid fa-user-plus'
+    if 'warehouse' in t:
+        return 'fa-solid fa-warehouse'
+    if 'product' in t:
+        return 'fa-solid fa-box'
+    if 'resolved' in t:
+        return 'fa-solid fa-circle-check'
+    if 'adjust' in t or 'count' in t:
+        return 'fa-solid fa-clipboard-list'
+    if 'supplier' in t:
+        return 'fa-solid fa-truck'
+    return 'fa-solid fa-bell'
+
+
+def _notif_detail_icon_bg(title):
+    t = title.lower()
+    if 'out of stock' in t:
+        return '#fef2f2'
+    if 'low stock' in t:
+        return '#fffbeb'
+    if 'transfer' in t:
+        return '#f0f9ff'
+    if 'purchase order' in t or t.startswith('po ') or 'receiving' in t:
+        return '#fefce8'
+    if 'sale' in t or 'order' in t or 'invoice' in t:
+        return '#ecfdf5'
+    if 'return' in t:
+        return '#fff1f2'
+    if 'complaint' in t or 'support' in t:
+        return '#fff7ed'
+    if 'user' in t or 'account' in t or 'role' in t:
+        return '#fdf4ff'
+    if 'warehouse' in t:
+        return '#f0f9ff'
+    if 'product' in t:
+        return '#faf5ff'
+    if 'resolved' in t:
+        return '#f0fdf4'
+    if 'supplier' in t:
+        return '#fef3c7'
+    return '#eff6ff'
+
+
+def _notif_detail_icon_color(title):
+    t = title.lower()
+    if 'out of stock' in t:
+        return '#dc2626'
+    if 'low stock' in t:
+        return '#d97706'
+    if 'transfer' in t:
+        return '#0284c7'
+    if 'purchase order' in t or t.startswith('po ') or 'receiving' in t:
+        return '#ca8a04'
+    if 'sale' in t or 'order' in t or 'invoice' in t:
+        return '#059669'
+    if 'return' in t:
+        return '#e11d48'
+    if 'complaint' in t or 'support' in t:
+        return '#ea580c'
+    if 'user' in t or 'account' in t or 'role' in t:
+        return '#c026d3'
+    if 'warehouse' in t:
+        return '#0284c7'
+    if 'product' in t:
+        return '#9333ea'
+    if 'resolved' in t:
+        return '#16a34a'
+    if 'supplier' in t:
+        return '#b45309'
+    return '#2563eb'
+
+
+def _time_ago(dt):
+    from django.utils import timezone as tz
+    diff = tz.now() - dt
+    secs = int(diff.total_seconds())
+    if secs < 60:
+        return 'just now'
+    mins = secs // 60
+    if mins < 60:
+        return f'{mins}m ago'
+    hours = mins // 60
+    if hours < 24:
+        return f'{hours}h ago'
+    days = hours // 24
+    if days < 7:
+        return f'{days}d ago'
+    return dt.strftime('%b %d')
+
+
+def _notif_category(title):
+    t = title.lower()
+    if any(w in t for w in ['stock', 'out of stock', 'low stock', 'reorder']):
+        return 'Inventory'
+    if any(w in t for w in ['purchase order', 'po ', 'receiving', 'supplier']):
+        return 'Purchasing'
+    if any(w in t for w in ['sale', 'transaction', 'pos', 'payment', 'invoice']):
+        return 'Sales'
+    if any(w in t for w in ['complaint', 'support', 'ticket']):
+        return 'Support'
+    if any(w in t for w in ['user', 'account', 'password', 'login']):
+        return 'Account'
+    if any(w in t for w in ['transfer', 'warehouse', 'count']):
+        return 'Inventory'
+    return 'General'
+
+
+def _notif_icon(cat):
+    return {
+        'Inventory': 'fa-solid fa-boxes-stacked',
+        'Purchasing': 'fa-solid fa-cart-shopping',
+        'Sales': 'fa-solid fa-cash-register',
+        'Support': 'fa-solid fa-headset',
+        'Account': 'fa-solid fa-user-shield',
+        'General': 'fa-solid fa-bell',
+    }.get(cat, 'fa-solid fa-bell')
+
+
+def _notif_color(cat):
+    return {
+        'Inventory': '#6366f1',
+        'Purchasing': '#a855f7',
+        'Sales': '#059669',
+        'Support': '#f59e0b',
+        'Account': '#3b82f6',
+        'General': '#64748b',
+    }.get(cat, '#64748b')
+
+
+def _notif_tag(cat):
+    return {
+        'Inventory': 'INV',
+        'Purchasing': 'PUR',
+        'Sales': 'SAL',
+        'Support': 'SUP',
+        'Account': 'ACC',
+        'General': 'GEN',
+    }.get(cat, 'GEN')
 
 
 @login_required
@@ -230,7 +464,7 @@ def _create_restock_po(reorder, product, user):
 
     destination = reorder.warehouse or Warehouse.objects.first()
     po = PurchaseOrder.objects.create(
-        po_number=f"PO-{tz.now().strftime('%Y%m%d')}-{PurchaseOrder.objects.count() + 1:04d}",
+        po_number=f"PO-{tz.now().strftime('%Y%m%d')}-{(PurchaseOrder.objects.aggregate(m=Max('pk'))['m'] or 0) + 1:04d}",
         supplier=reorder.default_supplier,
         destination_warehouse=destination,
         status='Draft',

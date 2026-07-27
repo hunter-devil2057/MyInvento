@@ -20,28 +20,37 @@
     </div>
 </form>
 <div class="flex-between mb-4">
-    <p class="text-muted" style="font-size:13px">{{ stock_levels.paginator.count }} record{{ stock_levels.paginator.count|pluralize }}</p>
+    <p style="font-size:14px;font-weight:600;color:var(--text);background:var(--primary-light);padding:6px 14px;border-radius:8px"><i class="fa-solid fa-scale-balanced" style="color:var(--primary);margin-right:6px"></i>{{ stock_levels.paginator.count }} record{{ stock_levels.paginator.count|pluralize }}</p>
     <div class="text-muted" style="font-size:14px">Total Value: <strong style="color:var(--text)">रू {{ total_value|floatformat:0|nepali }}</strong></div>
 </div>
 <div class="card">
     <div class="table-container">
         <table>
             <thead>
-                <tr><th>Product</th><th>SKU</th><th>Warehouse</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Actions</th></tr>
+                <tr><th style="width:50px"></th><th>Product</th><th>SKU</th><th>Warehouse</th><th>On Hand</th><th>Reserved</th><th>Available</th><th>Actions</th></tr>
             </thead>
             <tbody>
                 {% for sl in stock_levels %}
                 <tr>
+                    <td>
+                        {% if sl.product.primary_image %}
+                        <img src="{{ sl.product.primary_image.image.url }}" style="width:40px;height:40px;border-radius:8px;object-fit:cover">
+                        {% elif sl.product.image_url %}
+                        <img src="{{ sl.product.image_url }}" style="width:40px;height:40px;border-radius:8px;object-fit:cover">
+                        {% else %}
+                        <div style="width:40px;height:40px;border-radius:8px;background:linear-gradient(135deg,var(--border),var(--surface));display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:16px"><i class="fa-solid fa-box"></i></div>
+                        {% endif %}
+                    </td>
                     <td><a href="{% url 'product_detail' sl.product.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ sl.product.name }}</a></td>
                     <td class="text-sm text-muted">{{ sl.product.sku }}</td>
                     <td>{{ sl.warehouse.name }}</td>
                     <td style="font-weight:600">{{ sl.quantity_on_hand|nepali }}</td>
                     <td>{{ sl.quantity_reserved|nepali }}</td>
                     <td><span class="badge {% if sl.available_quantity <= 0 %}badge-danger{% elif sl.available_quantity <= 10 %}badge-warning{% else %}badge-success{% endif %}">{{ sl.available_quantity|nepali }}</span></td>
-                    <td><a href="{% url 'stock_adjust_product' sl.product.uuid %}" class="btn btn-outline btn-sm">Adjust</a></td>
+                    <td><a href="{% url 'stock_adjust_product' sl.product.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-sliders"></i> Adjust</a></td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="7" class="text-center text-muted" style="padding:40px">No stock records found.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted" style="padding:40px">No stock records found.</td></tr>
                 {% endfor %}
             </tbody>
         </table>

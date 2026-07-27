@@ -79,7 +79,11 @@ def password_reset_view(request):
     return render(request, 'accounts/password_reset.html')
 
 
+@login_required
 def register_view(request):
+    if not hasattr(request.user, 'profile') or not request.user.profile.is_admin_role:
+        messages.error(request, 'Only administrators can create new user accounts.')
+        return redirect('dashboard')
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
@@ -88,8 +92,9 @@ def register_view(request):
             profile = user.profile
             profile.role = role
             profile.save()
-            messages.success(request, f'Account created for {user.username}. You can now log in.')
-            return redirect('login')
+            log_action(request.user, 'Create', 'User', user.pk, f'Created user {user.username} with role {role}', ip_address=request.META.get('REMOTE_ADDR'))
+            messages.success(request, f'Account created for {user.username}.')
+            return redirect('user_list')
     else:
         form = UserRegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})

@@ -1,26 +1,35 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}{{ supplier.name }}{% endblock %}
-{% block page_title %}{{ supplier.name }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    <a href="{% url 'supplier_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Suppliers</a>
-    <div></div>
-    <div class="flex gap-2">
-        <a href="{% url 'supplier_edit' supplier.uuid %}" class="btn btn-primary">Edit Supplier</a>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+    .form-header-row { display: flex; align-items: center; justify-content: space-between; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'supplier_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <div class="form-header-row">
+        <div></div>
+        <h1 class="form-header-title" style="flex:1">{{ supplier.name }}</h1>
+        <a href="{% url 'supplier_edit' supplier.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
     </div>
 </div>
 <div class="card mb-6">
     <div class="card-body">
-        <div class="grid-3">
-            <div><div class="kpi-label">Contact Person</div><div style="font-weight:600">{{ supplier.contact_name|default:"-" }}</div></div>
-            <div><div class="kpi-label">Email</div><div>{{ supplier.email|default:"-" }}</div></div>
-            <div><div class="kpi-label">Phone</div><div>{{ supplier.phone|default:"-" }}</div></div>
+        <div class="grid-3" style="text-align:center">
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dbeafe;color:#2563eb"><i class="fa-solid fa-user-tie"></i></div><div class="kpi-label">Contact Person</div><div style="font-weight:600">{{ supplier.contact_name|default:"-" }}</div></div>
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dcfce7;color:#16a34a"><i class="fa-solid fa-envelope"></i></div><div class="kpi-label">Email</div><div style="font-weight:600">{{ supplier.email|default:"-" }}</div></div>
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#fef3c7;color:#d97706"><i class="fa-solid fa-phone"></i></div><div class="kpi-label">Phone</div><div style="font-weight:600">{{ supplier.phone|default:"-" }}</div></div>
         </div>
-        <div class="grid-3 mt-4">
-            <div><div class="kpi-label">Lead Time</div><div style="font-weight:600">{{ supplier.lead_time_days|nepali }} days</div></div>
-            <div><div class="kpi-label">On-Time %</div><div style="font-weight:600">{{ supplier.on_time_pct|nepali }}%</div></div>
-            <div><div class="kpi-label">Products</div><div style="font-weight:600">{{ supplier.active_products_count|nepali }}</div></div>
+        <div class="grid-3 mt-4" style="text-align:center">
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#fae8ff;color:#9333ea"><i class="fa-solid fa-clock"></i></div><div class="kpi-label">Lead Time</div><div style="font-weight:600">{{ supplier.lead_time_days|nepali }} days</div></div>
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dcfce7;color:#16a34a"><i class="fa-solid fa-circle-check"></i></div><div class="kpi-label">On-Time %</div><div style="font-weight:600">{{ supplier.on_time_pct|nepali }}%</div></div>
+            <div><div style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;margin:0 auto 10px;background:#dbeafe;color:#2563eb"><i class="fa-solid fa-boxes-stacked"></i></div><div class="kpi-label">Products</div><div style="font-weight:600">{{ supplier.active_products_count|nepali }}</div></div>
         </div>
     </div>
 </div>

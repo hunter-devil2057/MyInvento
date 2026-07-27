@@ -21,8 +21,8 @@
     </div>
 </form>
 <div class="flex-between mb-4">
-    <p class="text-muted" style="font-size:13px">{{ products.paginator.count }} product{{ products.paginator.count|pluralize }}</p>
-    <a href="{% url 'product_create' %}" class="btn btn-primary">+ Add Product</a>
+    <p style="font-size:14px;font-weight:600;color:var(--text);background:var(--primary-light);padding:6px 14px;border-radius:8px"><i class="fa-solid fa-box" style="color:var(--primary);margin-right:6px"></i>{{ products.paginator.count }} product{{ products.paginator.count|pluralize }}</p>
+    <a href="{% url 'product_create' %}" class="btn btn-success"><i class="fa-solid fa-plus"></i> Add Product</a>
 </div>
 <div class="card">
     <div class="table-container">
@@ -53,7 +53,7 @@
                     </td>
                     <td>{% if p.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Archived</span>{% endif %}</td>
                     <td>
-                        <a href="{% url 'product_edit' p.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'product_edit' p.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
                     </td>
                 </tr>
                 {% empty %}

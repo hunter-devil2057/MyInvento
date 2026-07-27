@@ -4,8 +4,8 @@
 {% block page_title %}Categories{% endblock %}
 {% block content %}
 <div class="flex-between mb-4">
-    <h3 style="font-size:16px;color:var(--text-muted)">{{ categories.paginator.count }} categories</h3>
-    <a href="{% url 'category_create' %}" class="btn btn-primary">+ Add Category</a>
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);background:var(--primary-light);padding:6px 14px;border-radius:8px"><i class="fa-solid fa-folder" style="color:var(--primary);margin-right:6px"></i>{{ categories.paginator.count }} categor{{ categories.paginator.count|pluralize:"y,ies" }}</h3>
+    <a href="{% url 'category_create' %}" class="btn btn-success"><i class="fa-solid fa-plus"></i> Add Category</a>
 </div>
 <div class="card">
     <div class="table-container">
@@ -18,7 +18,7 @@
                     <td class="text-muted">{{ cat.parent|default:"-" }}</td>
                     <td>{{ cat.products.count }}</td>
                     <td>
-                        <a href="{% url 'category_edit' cat.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'category_edit' cat.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
                         <a href="{% url 'category_delete' cat.uuid %}" class="btn btn-danger btn-sm">Delete</a>
                     </td>
                 </tr>

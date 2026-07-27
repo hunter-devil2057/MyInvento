@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F, DecimalField, ExpressionWrapper, Avg, Value
+from django.db.models.functions import TruncMonth
 from django.db import models
 from django.http import HttpResponse
 from .pdf_utils import pdf_response
@@ -9,9 +10,10 @@ import csv
 import datetime
 from inventory.models import StockLevel, StockMovement, Warehouse
 from catalog.models import Product, Category
-from sales.models import SalesTransaction, SalesTransactionLine, Payment, Return
+from sales.models import SalesTransaction, SalesTransactionLine, Payment, Return, ReturnLine
 from purchasing.models import PurchaseOrder, PurchaseOrderLine
 from suppliers.models import Supplier
+from accounts.models import SystemSettings
 from notifications.models import Alert
 
 
@@ -241,16 +243,21 @@ def purchase_report_view(request):
         po__in=pos
     ).aggregate(total=Sum('quantity_received'))['total'] or 0
 
-    by_supplier = pos.values('supplier__name').annotate(
-        count=Count('id'),
+    by_supplier = PurchaseOrderLine.objects.filter(
+        po__in=pos
+    ).values('po__supplier__name').annotate(
+        count=Count('po_id', distinct=True),
         total_cost=Sum(F('quantity_received') * F('unit_cost'), output_field=DecimalField())
     ).order_by('-total_cost')
 
     by_status = all_pos.values('status').annotate(count=Count('id'))
 
-    monthly_pos = pos.extra(
-        select={'month': "strftime('%Y-%m', order_date)"}
-    ).values('month').annotate(count=Count('id'), total=Sum(F('lines__quantity_received') * F('lines__unit_cost'), output_field=DecimalField())).order_by('month')
+    monthly_pos = pos.annotate(
+        month=TruncMonth('order_date')
+    ).values('month').annotate(
+        count=Count('id'),
+        total=Sum(F('lines__quantity_received') * F('lines__unit_cost'), output_field=DecimalField())
+    ).order_by('month')
 
     recent_pos = all_pos.select_related('supplier').order_by('-order_date')[:20]
 
@@ -261,11 +268,14 @@ def purchase_report_view(request):
         total_received=Sum('quantity_received'),
     ).order_by('-total_received')
 
+    total_pos_count = all_pos.count()
+
     return render(request, 'reports/purchase_report.html', {
         'recent_pos': recent_pos, 'by_supplier': by_supplier,
         'total_cost': total_cost, 'total_items_received': total_items_received,
         'by_status': by_status, 'monthly_pos': monthly_pos,
         'supplier_receiving': supplier_receiving, 'days': days,
+        'total_pos_count': total_pos_count,
     })
 
 
@@ -305,7 +315,17 @@ def supplier_performance_view(request):
         total_spend=Sum(F('purchase_orders__lines__quantity_received') * F('purchase_orders__lines__unit_cost'), output_field=DecimalField()),
         avg_lead_time=Avg('lead_time_days'),
     )
-    return render(request, 'reports/supplier_performance.html', {'suppliers': suppliers})
+
+    total_suppliers = suppliers.count()
+    total_spend = suppliers.aggregate(total=Sum('total_spend'))['total'] or 0
+    avg_lead = suppliers.aggregate(avg=Avg('lead_time_days'))['avg'] or 0
+    avg_on_time = suppliers.aggregate(avg=Avg('on_time_pct'))['avg'] or 0
+
+    return render(request, 'reports/supplier_performance.html', {
+        'suppliers': suppliers,
+        'total_suppliers': total_suppliers, 'total_spend': total_spend,
+        'avg_lead': avg_lead, 'avg_on_time': avg_on_time,
+    })
 
 
 @login_required
@@ -318,10 +338,18 @@ def product_performance_view(request):
         total_revenue=Sum('sale_lines__subtotal', filter=Q(sale_lines__transaction__status='Completed', sale_lines__transaction__completed_at__date__gte=start_date)),
         total_cost=Sum(F('sale_lines__quantity') * F('cost_price'), filter=Q(sale_lines__transaction__status='Completed', sale_lines__transaction__completed_at__date__gte=start_date), output_field=DecimalField()),
         transaction_count=Count('sale_lines__transaction', filter=Q(sale_lines__transaction__status='Completed', sale_lines__transaction__completed_at__date__gte=start_date), distinct=True),
-    ).order_by('-total_revenue')[:50]
+    ).order_by('-total_revenue')
+
+    products_list = list(products)
+    total_products_sold = len([p for p in products_list if (p.total_sold or 0) > 0])
+    total_revenue = sum(p.total_revenue or 0 for p in products_list)
+    total_sold_qty = sum(p.total_sold or 0 for p in products_list)
+    total_profit = sum((p.total_revenue or 0) - (p.total_cost or 0) for p in products_list)
 
     return render(request, 'reports/product_performance.html', {
-        'products': products, 'days': days,
+        'products': products_list[:50], 'days': days,
+        'total_products_sold': total_products_sold, 'total_revenue': total_revenue,
+        'total_sold_qty': total_sold_qty, 'total_profit': total_profit,
     })
 
 
@@ -355,7 +383,7 @@ def profit_loss_view(request):
 
     gross_profit = revenue - cost_of_goods
     gross_margin = round((gross_profit / revenue * 100), 1) if revenue > 0 else 0
-    net_profit = gross_profit - discounts + taxes
+    net_profit = gross_profit - discounts - refunds
 
     by_day = SalesTransaction.objects.filter(
         status='Completed', completed_at__date__gte=start_date
@@ -417,6 +445,7 @@ def payment_methods_view(request):
         'by_method': by_method, 'total_amount': total_amount,
         'total_count': total_count, 'by_day': list(by_day),
         'by_status': by_status, 'days': days,
+        'avg_payment': total_amount / total_count if total_count else 0,
     })
 
 
@@ -492,8 +521,17 @@ def category_analysis_view(request):
         transaction__completed_at__date__gte=start_date
     ).aggregate(total=Sum('subtotal'))['total'] or 0
 
+    total_products = Category.objects.filter(
+        products__is_active=True
+    ).aggregate(total=Count('products'))['total'] or 0
+
+    total_stock = Category.objects.aggregate(
+        total=Sum('products__stock_levels__quantity_on_hand')
+    )['total'] or 0
+
     return render(request, 'reports/category_analysis.html', {
         'categories': categories, 'total_revenue': total_revenue, 'days': days,
+        'total_products': total_products, 'total_stock': total_stock,
     })
 
 
@@ -504,8 +542,9 @@ def stock_health_view(request):
     ).select_related('product', 'warehouse')
 
     healthy = stock_levels.filter(
-        quantity_on_hand__gt=F('product__stock_levels__reorder_min')
-    ).count()
+        quantity_on_hand__gt=F('reorder_min')
+    ).exclude(reorder_min__isnull=True).count()
+    healthy += stock_levels.filter(reorder_min__isnull=True, quantity_on_hand__gt=0).count()
 
     out_of_stock = stock_levels.filter(quantity_on_hand=0).count()
     low_stock = stock_levels.filter(
@@ -526,7 +565,7 @@ def stock_health_view(request):
     return render(request, 'reports/stock_health.html', {
         'out_of_stock': out_of_stock, 'low_stock': low_stock,
         'overstocked': overstocked, 'turnover_data': turnover_data,
-        'total_lines': stock_levels.count(),
+        'total_lines': stock_levels.count(), 'healthy': healthy,
     })
 
 

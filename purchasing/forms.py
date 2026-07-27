@@ -26,7 +26,7 @@ class PurchaseOrderLineForm(forms.ModelForm):
             'product': forms.Select(attrs={'class': 'form-input'}),
             'variant': forms.Select(attrs={'class': 'form-input'}),
             'quantity_ordered': forms.NumberInput(attrs={'class': 'form-input', 'min': '1'}),
-            'unit_cost': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
+            'unit_cost': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
             'batch_number': forms.TextInput(attrs={'class': 'form-input'}),
             'expiry_date': forms.DateInput(attrs={'class': 'form-input', 'type': 'date'}),
         }

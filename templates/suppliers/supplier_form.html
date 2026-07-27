@@ -1,15 +1,39 @@
 {% extends 'base.html' %}
 {% block title %}{{ title }}{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    {% if editing %}
-    <a href="{% url 'supplier_detail' supplier.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Supplier</a>
-    {% else %}
-    <a href="{% url 'supplier_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Suppliers</a>
-    {% endif %}
-    <div></div>
-    <div></div>
+<style>
+    .lt-counter input[type="number"] { width: 60px; text-align: center; border: none; background: transparent; color: var(--text); font-size: 16px; font-weight: 700; outline: none; -moz-appearance: textfield; padding: 8px 0; }
+    .lt-counter input[type="number"]::-webkit-outer-spin-button,
+    .lt-counter input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .lt-counter button { transition: all .25s cubic-bezier(.4,0,.2,1); }
+    .lt-counter button:hover { transform: scale(1.1); }
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+    .lt-counter { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: var(--bg); width: fit-content; transition: border-color .2s, box-shadow .2s; }
+    .lt-counter:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+    .lt-counter button { width: 36px; height: 38px; border: none; cursor: pointer; font-size: 16px; font-weight: 900; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
+    .lt-counter .lt-minus { background: #fee2e2; color: #ef4444; border-right: 1px solid rgba(0,0,0,.06); }
+    .lt-counter .lt-plus { background: #dcfce7; color: #059669; border-left: 1px solid rgba(0,0,0,.06); }
+    .lt-counter .lt-minus:hover { background: #ef4444; color: #fff; }
+    .lt-counter .lt-plus:hover { background: #059669; color: #fff; }
+    [data-theme="dark"] .lt-counter .lt-minus { background: rgba(239,68,68,.12); color: #f87171; }
+    [data-theme="dark"] .lt-counter .lt-plus { background: rgba(5,150,105,.12); color: #34d399; }
+    [data-theme="dark"] .lt-counter .lt-minus:hover { background: #ef4444; color: #fff; }
+    [data-theme="dark"] .lt-counter .lt-plus:hover { background: #059669; color: #fff; }
+    .lt-counter input[type="number"] { width: 50px; text-align: center; border: none; background: transparent; color: var(--text); font-size: 15px; font-weight: 700; outline: none; -moz-appearance: textfield; padding: 6px 0; }
+    .lt-counter input[type="number"]::-webkit-outer-spin-button, .lt-counter input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        {% if editing %}
+        <a href="{% url 'supplier_detail' supplier.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        {% else %}
+        <a href="{% url 'supplier_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        {% endif %}
+    </div>
+    <h1 class="form-header-title">{{ title }}</h1>
 </div>
 <div style="max-width:600px;margin:0 auto">
     <div class="card"><div class="card-body">
@@ -27,14 +51,21 @@
             </div>
             <div class="form-row">
                 <div class="form-group"><label class="form-label">Phone</label>{{ form.phone }}{% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}</div>
-                <div class="form-group"><label class="form-label">Lead Time (days)</label>{{ form.lead_time_days }}{% if form.lead_time_days.errors %}<div class="form-error">{{ form.lead_time_days.errors.0 }}</div>{% endif %}</div>
+                <div class="form-group"><label class="form-label">Lead Time (days)</label>
+                    <div class="lt-counter">
+                        <button type="button" class="lt-minus" onclick="var inp=this.nextElementSibling;var v=parseInt(inp.value)||0;if(v>0)inp.value=v-1">-</button>
+                        {{ form.lead_time_days }}
+                        <button type="button" class="lt-plus" onclick="var inp=this.previousElementSibling;inp.value=(parseInt(inp.value)||0)+1">+</button>
+                    </div>
+                    {% if form.lead_time_days.errors %}<div class="form-error">{{ form.lead_time_days.errors.0 }}</div>{% endif %}
+                </div>
             </div>
             <div class="form-group"><label class="form-label">Address</label>{{ form.address }}{% if form.address.errors %}<div class="form-error">{{ form.address.errors.0 }}</div>{% endif %}</div>
-            <div class="flex gap-2"><button type="submit" class="btn btn-primary">Save</button>
+            <div style="display:flex;gap:12px;justify-content:center"><button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i> Save</button>
                 {% if editing %}
-                <a href="{% url 'supplier_detail' supplier.uuid %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'supplier_detail' supplier.uuid %}" class="btn btn-danger">Cancel</a>
                 {% else %}
-                <a href="{% url 'supplier_list' %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'supplier_list' %}" class="btn btn-danger">Cancel</a>
                 {% endif %}
             </div>
         </form>

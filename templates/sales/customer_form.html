@@ -1,15 +1,21 @@
 {% extends 'base.html' %}
 {% block title %}{{ title }}{% endblock %}
-{% block page_title %}{{ title }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    {% if editing %}
-    <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Customer</a>
-    {% else %}
-    <a href="{% url 'customer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Customers</a>
-    {% endif %}
-    <div></div>
-    <div></div>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        {% if editing %}
+        <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        {% else %}
+        <a href="{% url 'customer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+        {% endif %}
+    </div>
+    <h1 class="form-header-title">{{ title }}</h1>
 </div>
 <div style="max-width:600px;margin:0 auto">
     <div class="card"><div class="card-body">
@@ -24,12 +30,12 @@
                 <div class="form-group"><label class="form-label">Phone</label>{{ form.phone }}{% if form.phone.errors %}<div class="form-error">{{ form.phone.errors.0 }}</div>{% endif %}</div>
             </div>
             <div class="form-group"><label class="form-label">Default Address</label>{{ form.default_address }}</div>
-            <div class="flex gap-2" style="margin-top:20px">
-                <button type="submit" class="btn btn-primary">Save</button>
+            <div style="display:flex;gap:12px;justify-content:center;margin-top:20px">
+                <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i> Save</button>
                 {% if editing %}
-                <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'customer_detail' customer.uuid %}" class="btn btn-danger">Cancel</a>
                 {% else %}
-                <a href="{% url 'customer_list' %}" class="btn btn-secondary">Cancel</a>
+                <a href="{% url 'customer_list' %}" class="btn btn-danger">Cancel</a>
                 {% endif %}
             </div>
         </form>

@@ -5,7 +5,7 @@
 {% block page_title %}Stock Movement History{% endblock %}
 {% block content %}
 <div class="flex-between mb-4">
-    <div class="flex gap-2" style="flex-wrap:wrap">
+    <div class="flex gap-2" style="flex-wrap:wrap;justify-content:center">
         <a href="?type=" class="btn {% if not selected_type %}btn-primary{% else %}btn-outline{% endif %} btn-sm">All</a>
         <a href="?type=SALE" class="btn {% if selected_type == 'SALE' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Sales</a>
         <a href="?type=PURCHASE" class="btn {% if selected_type == 'PURCHASE' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Purchases</a>

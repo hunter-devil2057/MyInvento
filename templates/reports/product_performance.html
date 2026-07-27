@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Product Performance{% endblock %}
-{% block page_title %}Product Performance{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+    <a href="{% url 'reports_home' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+    <h1 class="form-header-title"><i class="fa-solid fa-box" style="color:var(--primary);margin-right:8px"></i>Product Performance</h1>
 </div>
 <div class="flex-between mb-4">
     <div class="flex gap-2">
@@ -12,6 +20,12 @@
         <a href="?days=90" class="btn btn-sm {% if days == 90 %}btn-primary{% else %}btn-outline{% endif %}">90 Days</a>
         <a href="?days=365" class="btn btn-sm {% if days == 365 %}btn-primary{% else %}btn-outline{% endif %}">1 Year</a>
     </div>
+</div>
+<div class="kpi-grid stagger-in mb-4">
+    <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Revenue</div><div class="kpi-value">रू {{ total_revenue|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-box"></i></div><div class="kpi-info"><div class="kpi-label">Products Sold</div><div class="kpi-value">{{ total_products_sold|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-cart-shopping"></i></div><div class="kpi-info"><div class="kpi-label">Units Sold</div><div class="kpi-value">{{ total_sold_qty|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-chart-line"></i></div><div class="kpi-info"><div class="kpi-label">Total Profit</div><div class="kpi-value">रू {{ total_profit|floatformat:0|nepali }}</div></div></div>
 </div>
 <div class="card">
     <div class="card-body" style="padding:0">

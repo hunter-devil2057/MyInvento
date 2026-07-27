@@ -32,8 +32,8 @@ class ProductForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Product description...'}),
             'category': forms.Select(attrs={'class': 'form-input'}),
             'unit_of_measure': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'e.g. pcs, kg, box'}),
-            'cost_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
-            'sale_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
+            'cost_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'sale_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
             'tax_class': forms.Select(attrs={'class': 'form-input'}, choices=[
                 ('Standard', 'Standard'), ('Zero-rated', 'Zero-rated'), ('Exempt', 'Exempt'),
             ]),
@@ -61,8 +61,8 @@ class ProductVariantForm(forms.ModelForm):
         widgets = {
             'sku': forms.TextInput(attrs={'class': 'form-input'}),
             'barcode': forms.TextInput(attrs={'class': 'form-input'}),
-            'cost_price_override': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
-            'sale_price_override': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
+            'cost_price_override': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'sale_price_override': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
 
 
@@ -72,6 +72,7 @@ class ProductImageForm(forms.ModelForm):
         fields = ['image', 'is_primary', 'order']
         widgets = {
             'image': forms.ClearableFileInput(attrs={'accept': 'image/*'}),
+            'order': forms.NumberInput(attrs={'class': 'form-input', 'min': '1'}),
         }
 
 

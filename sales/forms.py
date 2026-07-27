@@ -26,8 +26,8 @@ class SalesTransactionLineForm(forms.ModelForm):
             'product': forms.Select(attrs={'class': 'form-input'}),
             'variant': forms.Select(attrs={'class': 'form-input'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-input', 'min': '1'}),
-            'unit_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
-            'discount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
+            'unit_price': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'discount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
 
 
@@ -40,8 +40,8 @@ class PaymentForm(forms.ModelForm):
         fields = ['method', 'amount', 'amount_tendered']
         widgets = {
             'method': forms.Select(attrs={'class': 'form-input'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
-            'amount_tendered': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
+            'amount_tendered': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01', 'min': '0', 'inputmode': 'decimal'}),
         }
 
 

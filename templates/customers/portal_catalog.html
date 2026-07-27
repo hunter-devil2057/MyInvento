@@ -13,7 +13,7 @@
                 <option value="">All Categories</option>
                 {% for cat in categories %}<option value="{{ cat.pk }}" {% if selected_category == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>{% endfor %}
             </select>
-            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-magnifying-glass" style="color:#fff"></i> Search</button>
+            <button type="submit" class="btn btn-success"><i class="fa-solid fa-magnifying-glass" style="color:#fff"></i> Search</button>
         </form>
     </div>
     <style>
@@ -21,8 +21,15 @@
         @media(max-width:480px) { .search-expand-wrap { width: 100% !important; } .search-expand-wrap:focus-within { width: 100% !important; } }
         .search-expand { width: 100% !important; transition: border-color .3s, box-shadow .3s; }
         .qty-control { display: flex; align-items: center; gap: 0; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
-        .qty-control button { width: 30px; height: 30px; border: none; background: var(--input-bg); color: var(--text); cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-        .qty-control button:hover { background: var(--border); }
+        .qty-control button { width: 30px; height: 30px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .3s cubic-bezier(.4,0,.2,1); border-radius: 6px; }
+        .qty-control button:first-child { background: #fee2e2; color: #ef4444; border-right: 1px solid rgba(0,0,0,.06); }
+        .qty-control button:first-child:hover { background: #ef4444; color: #fff; transform: scale(1.12); box-shadow: 0 3px 12px rgba(239,68,68,.35); }
+        .qty-control button:last-child { background: #dcfce7; color: #059669; border-left: 1px solid rgba(0,0,0,.06); }
+        .qty-control button:last-child:hover { background: #059669; color: #fff; transform: scale(1.12); box-shadow: 0 3px 12px rgba(5,150,105,.35); }
+        [data-theme="dark"] .qty-control button:first-child { background: rgba(239,68,68,.12); color: #f87171; }
+        [data-theme="dark"] .qty-control button:first-child:hover { background: #ef4444; color: #fff; }
+        [data-theme="dark"] .qty-control button:last-child { background: rgba(5,150,105,.12); color: #34d399; }
+        [data-theme="dark"] .qty-control button:last-child:hover { background: #059669; color: #fff; }
         .qty-control input { width: 36px; text-align: center; border: none; background: transparent; color: var(--text); font-size: 14px; font-weight: 600; outline: none; -moz-appearance: textfield; }
         .qty-control input::-webkit-outer-spin-button,
         .qty-control input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -53,7 +60,7 @@
                             <input type="number" name="quantity" value="1" min="1" max="{{ p.stock|default:99 }}">
                             <button type="button" onclick="event.preventDefault();var inp=this.parentNode.querySelector('input');inp.value=parseInt(inp.value)+1">+</button>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm" style="flex:1;justify-content:center;color:#fff;font-size:12px"><i class="fa-solid fa-cart-plus" style="color:#fff"></i> Add</button>
+                        <button type="submit" class="btn btn-success btn-sm" style="flex:1;justify-content:center;color:#fff;font-size:12px"><i class="fa-solid fa-cart-plus" style="color:#fff"></i> Add</button>
                     </form>
                     {% endif %}
                 </div>

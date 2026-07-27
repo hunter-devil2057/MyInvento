@@ -18,7 +18,7 @@
                     <td>{{ r.default_supplier.name }}</td>
                     <td>{% if r.is_active %}<span class="badge badge-success">Yes</span>{% else %}<span class="badge badge-secondary">No</span>{% endif %}</td>
                     <td>
-                        <a href="{% url 'reorder_rule_edit' r.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                        <a href="{% url 'reorder_rule_edit' r.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
                         <form method="post" action="{% url 'reorder_rule_delete' r.uuid %}" style="display:inline" onsubmit="return confirm('Delete this rule?')">{% csrf_token %}<button class="btn btn-danger btn-sm">Delete</button></form>
                     </td>
                 </tr>

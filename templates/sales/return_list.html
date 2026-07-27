@@ -17,7 +17,7 @@
                     <td><span class="badge {% if r.status == 'Completed' %}badge-success{% elif r.status == 'Requested' %}badge-warning{% elif r.status == 'Rejected' %}badge-danger{% else %}badge-info{% endif %}">{{ r.status }}</span></td>
                     <td>रू {{ r.refund_amount|floatformat:2 }}</td>
                     <td class="text-sm text-muted">{{ r.created_at|date:"d M Y" }}</td>
-                    <td><a href="{% url 'return_detail' r.uuid %}" class="btn btn-outline btn-sm">View</a></td>
+                    <td><a href="{% url 'return_detail' r.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-eye"></i> View</a></td>
                 </tr>
                 {% empty %}
                 <tr><td colspan="7" class="text-center text-muted" style="padding:30px">No returns.</td></tr>

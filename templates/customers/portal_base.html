@@ -18,13 +18,13 @@
     </script>
     <style>
         :root {
-            --bg: #ffffff; --surface: #f8fafc; --text: #1e293b; --text-muted: #64748b;
-            --border: #e2e8f0; --primary: #6366f1; --primary-hover: #4f46e5;
-            --danger: #ef4444; --card-bg: #fefcf3;
+            --bg: #FAF9F6; --surface: #F9F6EE; --text: #1e293b; --text-muted: #64748b;
+            --border: #E9DCC9; --primary: #6366f1; --primary-hover: #4f46e5;
+            --danger: #ef4444; --card-bg: #F9F6EE;
             --shadow-sm: 0 1px 3px rgba(0,0,0,.06); --shadow-md: 0 4px 16px rgba(0,0,0,.08);
             --shadow-lg: 0 10px 30px rgba(0,0,0,.1);
             --nav-bg: #0f172a; --hero-from: #1e3a5f; --hero-to: #0f172a;
-            --input-bg: #f8fafc; --input-border: #e2e8f0;
+            --input-bg: #FAF9F6; --input-border: #E9DCC9;
             --footer-bg: #0f172a; --footer-text: #94a3b8;
         }
         [data-theme="dark"] {
@@ -234,6 +234,10 @@
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(99,102,241,.4); }
         .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
         .btn-outline:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+        .btn-success { background: linear-gradient(135deg, #10b981, #059669); color: #fff; box-shadow: 0 2px 10px rgba(16,185,129,.3); }
+        .btn-success:hover { box-shadow: 0 4px 20px rgba(16,185,129,.45); transform: translateY(-2px); }
+        .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; box-shadow: 0 2px 10px rgba(239,68,68,.3); }
+        .btn-danger:hover { box-shadow: 0 4px 20px rgba(239,68,68,.45); transform: translateY(-2px); }
         .btn-lg { padding: 14px 28px; font-size: 15px; }
         .btn-sm { padding: 6px 14px; font-size: 12px; }
         .flex-between { display: flex; align-items: center; justify-content: space-between; }

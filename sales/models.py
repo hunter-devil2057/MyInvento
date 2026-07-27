@@ -110,7 +110,7 @@ class SalesTransactionLine(models.Model):
         return f"{self.product.name} x{self.quantity}"
 
     def save(self, *args, **kwargs):
-        self.subtotal = (self.quantity * self.unit_price) - self.discount + self.tax
+        self.subtotal = (self.quantity * self.unit_price) - self.discount
         super().save(*args, **kwargs)
 
 

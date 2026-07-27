@@ -1,68 +1,466 @@
 {% extends 'base.html' %}
 {% block title %}New Transfer{% endblock %}
-{% block page_title %}Create Stock Transfer{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    <a href="{% url 'stock_transfer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Transfers</a>
-    <div></div>
-    <div></div>
+<style>
+    .wh-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .wh-selector .form-group { margin-bottom: 0; }
+    @media (max-width: 640px) { .wh-selector { grid-template-columns: 1fr; } }
+
+    .wh-hero { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 12px; border: 2px solid var(--border); background: var(--surface); transition: all .25s; }
+    .wh-hero.active { border-color: var(--primary); background: linear-gradient(135deg, rgba(99,102,241,.04), rgba(168,85,247,.04)); box-shadow: 0 0 0 3px rgba(99,102,241,.08); }
+    .wh-hero-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+    .wh-hero-icon.from { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #ef4444; }
+    .wh-hero-icon.to { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #059669; }
+    .wh-hero-info { flex: 1; min-width: 0; }
+    .wh-hero-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .wh-hero-meta { font-size: 12px; color: var(--text-muted); }
+
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+    @media (max-width: 768px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+    .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; transition: all .2s; }
+    .kpi-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.06); }
+    .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 16px; }
+    .kpi-value { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.2; }
+    .kpi-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 600; margin-top: 2px; }
+
+    .browse-search { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+    .browse-search input { flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; outline: none; }
+    .browse-search input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+    .browse-summary { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
+    .browse-summary-text { font-size: 13px; color: var(--text-muted); }
+    .browse-summary-value { font-size: 13px; font-weight: 700; color: var(--primary); }
+
+    .browse-item { display: grid; grid-template-columns: 52px 1fr auto auto auto; gap: 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--border); transition: all .15s; }
+    .browse-item:last-child { border-bottom: none; }
+    .browse-item:hover { background: rgba(99,102,241,.03); }
+    .browse-img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
+    .browse-placeholder { width: 52px; height: 52px; border-radius: 10px; background: linear-gradient(135deg, var(--border), var(--surface)); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); flex-shrink: 0; }
+    .browse-details { min-width: 0; }
+    .browse-name { font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 2px; }
+    .browse-sku { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
+    .browse-desc { font-size: 11px; color: var(--text-muted); line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .browse-cat { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(99,102,241,.08); color: var(--primary); flex-shrink: 0; }
+    .browse-stock { text-align: right; flex-shrink: 0; min-width: 80px; }
+    .browse-stock-qty { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .browse-stock-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+    .browse-stock-value { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+    .browse-actions { flex-shrink: 0; }
+    .browse-add { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; background: linear-gradient(135deg,#059669,#047857); color: #fff; border: none; cursor: pointer; transition: all .2s; white-space: nowrap; }
+    .browse-add:hover { transform: translateY(-1px); box-shadow: 0 2px 10px rgba(5,150,105,.35); }
+    .browse-added { padding: 8px 14px; border-radius: 8px; font-size: 11px; font-weight: 600; background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    @media (max-width: 768px) {
+        .browse-item { grid-template-columns: 44px 1fr auto; }
+        .browse-cat, .browse-stock { display: none; }
+    }
+
+    .tl-card { display: grid; grid-template-columns: 52px 1fr auto auto; gap: 14px; align-items: center; padding: 16px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; transition: all .2s; }
+    .tl-card:hover { border-color: var(--primary); box-shadow: 0 2px 12px rgba(0,0,0,.04); }
+    .tl-img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border); flex-shrink: 0; }
+    .tl-placeholder { width: 52px; height: 52px; border-radius: 10px; background: linear-gradient(135deg, var(--border), var(--surface)); display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--text-muted); flex-shrink: 0; }
+    .tl-info { min-width: 0; }
+    .tl-name { font-weight: 700; font-size: 14px; color: var(--text); }
+    .tl-sku { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+    .tl-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .tl-meta-item { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .tl-meta-item strong { color: var(--text); font-weight: 600; }
+    .tl-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    @media (max-width: 768px) { .tl-right { flex-wrap: wrap; } }
+
+    .qty-control { display: flex; align-items: center; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .qty-btn { width: 34px; height: 34px; border: none; cursor: pointer; font-size: 16px; font-weight: 900; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .qty-btn.minus { background: #fee2e2; color: #ef4444; border-right: 1px solid rgba(0,0,0,.06); }
+    .qty-btn.plus { background: #dcfce7; color: #059669; border-left: 1px solid rgba(0,0,0,.06); }
+    .qty-btn.minus:hover { background: #ef4444; color: #fff; transform: scale(1.08); box-shadow: 0 2px 8px rgba(239,68,68,.3); }
+    .qty-btn.plus:hover { background: #059669; color: #fff; transform: scale(1.08); box-shadow: 0 2px 8px rgba(5,150,105,.3); }
+    [data-theme="dark"] .qty-btn.minus { background: rgba(239,68,68,.12); color: #f87171; }
+    [data-theme="dark"] .qty-btn.plus { background: rgba(5,150,105,.12); color: #34d399; }
+    [data-theme="dark"] .qty-btn.minus:hover { background: #ef4444; color: #fff; }
+    [data-theme="dark"] .qty-btn.plus:hover { background: #059669; color: #fff; }
+    .qty-input { width: 50px; text-align: center; border: none; background: transparent; color: var(--text); font-size: 15px; font-weight: 700; outline: none; -moz-appearance: textfield; }
+    .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .qty-control input[type="number"] { width: 50px; text-align: center; border: none; background: transparent; color: var(--text); font-size: 15px; font-weight: 700; outline: none; -moz-appearance: textfield; }
+    .qty-control input[type="number"]::-webkit-outer-spin-button, .qty-control input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+    .tl-total { text-align: right; min-width: 90px; flex-shrink: 0; }
+    .tl-total-value { font-size: 16px; font-weight: 800; color: #059669; }
+    .tl-total-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .3px; }
+
+    .tl-remove { width: 32px; height: 32px; border-radius: 8px; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; transition: all .2s; }
+    .tl-remove:hover { background: #ef4444; color: #fff; transform: scale(1.1); }
+    [data-theme="dark"] .tl-remove { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.2); }
+    [data-theme="dark"] .tl-remove:hover { background: #ef4444; color: #fff; }
+
+    .transfer-empty { text-align: center; padding: 40px; color: var(--text-muted); }
+    .no-warehouse-msg { text-align: center; padding: 48px 20px; color: var(--text-muted); }
+    .no-warehouse-msg i { font-size: 36px; opacity: .25; margin-bottom: 10px; display: block; }
+    .no-warehouse-msg p { font-size: 14px; }
+
+    .loading-spinner { text-align: center; padding: 40px; color: var(--text-muted); }
+    .loading-spinner i { font-size: 24px; margin-right: 8px; }
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'stock_transfer_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <h1 class="form-header-title">Create Stock Transfer</h1>
 </div>
-<div style="max-width:900px;margin:0 auto">
-    <div class="card">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                {% if form.errors or formset.errors %}
-                <div class="alert-error-inline">Please correct the errors below.</div>
-                {% endif %}
-                <div class="form-row">
+
+<div style="max-width:960px;margin:0 auto">
+    <form method="post" id="transferForm">
+        {% csrf_token %}
+        {% if form.errors or formset.errors %}
+        <div class="alert-error-inline">
+            <i class="fa-solid fa-circle-exclamation" style="margin-right:6px"></i> Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-body">
+                <h3 style="font-size:16px;font-weight:700;margin-bottom:16px"><i class="fa-solid fa-truck-moving" style="color:var(--primary);margin-right:6px"></i> Transfer Details</h3>
+                <div class="wh-selector">
                     <div class="form-group">
-                        <label class="form-label">From Warehouse *</label>
-                        {{ form.source_warehouse }}
+                        <label class="form-label"><i class="fa-solid fa-arrow-right-from-bracket" style="color:#ef4444;margin-right:4px"></i> From Warehouse *</label>
+                        <div class="wh-hero" id="whHeroFrom">
+                            <div class="wh-hero-icon from"><i class="fa-solid fa-building"></i></div>
+                            <div class="wh-hero-info">
+                                <div class="wh-hero-name" id="whFromName">Select warehouse</div>
+                                <div class="wh-hero-meta">Source warehouse</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px">{{ form.source_warehouse }}</div>
                         {% if form.source_warehouse.errors %}<div class="form-error">{{ form.source_warehouse.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="form-group">
-                        <label class="form-label">To Warehouse *</label>
-                        {{ form.destination_warehouse }}
+                        <label class="form-label"><i class="fa-solid fa-arrow-right-to-bracket" style="color:#059669;margin-right:4px"></i> To Warehouse *</label>
+                        <div class="wh-hero" id="whHeroTo">
+                            <div class="wh-hero-icon to"><i class="fa-solid fa-warehouse"></i></div>
+                            <div class="wh-hero-info">
+                                <div class="wh-hero-name" id="whToName">Select warehouse</div>
+                                <div class="wh-hero-meta">Destination warehouse</div>
+                            </div>
+                        </div>
+                        <div style="margin-top:8px">{{ form.destination_warehouse }}</div>
                         {% if form.destination_warehouse.errors %}<div class="form-error">{{ form.destination_warehouse.errors.0 }}</div>{% endif %}
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Notes</label>
+                    <label class="form-label"><i class="fa-solid fa-sticky-note" style="color:var(--primary);margin-right:4px"></i> Notes</label>
                     {{ form.notes }}
                 </div>
-
-                <h3 style="margin:24px 0 12px;font-size:16px;font-weight:700;color:var(--text)">Items to Transfer</h3>
-                {{ formset.management_form }}
-                {% for line_form in formset %}
-                <div style="display:flex;gap:12px;align-items:end;margin-bottom:12px;padding:16px;background:var(--border-light);border-radius:var(--radius-sm);border:1px solid var(--border)">
-                    <div style="flex:2">
-                        <label class="form-label" style="font-size:11px">Product</label>
-                        {{ line_form.product }}
-                    </div>
-                    <div style="flex:1">
-                        <label class="form-label" style="font-size:11px">Quantity</label>
-                        {{ line_form.quantity }}
-                    </div>
-                    {% if line_form.DELETE %}
-                    <div style="min-width:40px;text-align:center">
-                        <label class="form-label" style="font-size:11px">Del?</label>
-                        {{ line_form.DELETE }}
-                    </div>
-                    {% endif %}
-                    {{ line_form.id }}
-                </div>
-                {% for field in line_form %}
-                {% if field.errors %}<div class="form-error" style="margin-top:-8px;margin-bottom:8px">{{ field.errors.0 }}</div>{% endif %}
-                {% endfor %}
-                {% endfor %}
-
-                <div class="flex gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary">Create Transfer</button>
-                    <a href="{% url 'stock_transfer_list' %}" class="btn btn-secondary">Cancel</a>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
+
+        <div class="kpi-row" id="kpiRow" style="display:none">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(99,102,241,.05));color:var(--primary)"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div class="kpi-value" id="kpiItems">0</div>
+                <div class="kpi-label">Products</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(59,130,246,.05));color:#3b82f6"><i class="fa-solid fa-cubes"></i></div>
+                <div class="kpi-value" id="kpiUnits">0</div>
+                <div class="kpi-label">Total Units</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,rgba(234,179,8,.1),rgba(234,179,8,.05));color:#eab308"><i class="fa-solid fa-coins"></i></div>
+                <div class="kpi-value" id="kpiCost">Rs. 0</div>
+                <div class="kpi-label">Est. Cost</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background:linear-gradient(135deg,rgba(5,150,105,.1),rgba(5,150,105,.05));color:#059669"><i class="fa-solid fa-tag"></i></div>
+                <div class="kpi-value" id="kpiValue">Rs. 0</div>
+                <div class="kpi-label">Sale Value</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px">
+            <div class="card-body" style="padding:0">
+                <div class="browse-summary">
+                    <h3 style="font-size:16px;font-weight:700;margin:0"><i class="fa-solid fa-plus-circle" style="color:var(--primary);margin-right:6px"></i> Add Products</h3>
+                    <span id="browseCount" class="browse-summary-text"></span>
+                </div>
+                <div class="browse-search" id="browseSearch" style="display:none">
+                    <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);font-size:14px"></i>
+                    <input type="text" id="browseSearchInput" placeholder="Search products by name, SKU, or category...">
+                </div>
+                <div id="browseArea" class="no-warehouse-msg">
+                    <i class="fa-solid fa-warehouse"></i>
+                    <p>Select a <strong>Source Warehouse</strong> above to browse available products</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom:24px">
+            <div class="card-body">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <h3 style="font-size:16px;font-weight:700;margin:0"><i class="fa-solid fa-list-check" style="color:var(--primary);margin-right:6px"></i> Transfer Items <span id="lineCount" style="font-size:13px;font-weight:500;color:var(--text-muted)"></span></h3>
+                </div>
+                {{ formset.management_form }}
+                <div id="transferLines">
+                    {% for line_form in formset %}
+                    <div class="tl-card" data-form-index="{{ forloop.counter0 }}">
+                        {{ line_form.id }}
+                        <div class="tl-img-placeholder"><i class="fa-solid fa-box"></i></div>
+                        <div class="tl-info">
+                            {% if line_form.product.value %}
+                            <div class="tl-name">{{ line_form.product.value }}</div>
+                            {% endif %}
+                            <div style="margin-top:4px">{{ line_form.product }}</div>
+                            {% for field in line_form %}
+                            {% if field.errors %}<div class="form-error" style="margin-top:4px">{{ field.errors.0 }}</div>{% endif %}
+                            {% endfor %}
+                        </div>
+                        <div class="tl-right">
+                            <div class="qty-control">
+                                <button type="button" class="qty-btn minus" onclick="var inp=this.nextElementSibling;var v=parseInt(inp.value)||1;if(v>1){inp.value=v-1;inp.dispatchEvent(new Event('change'))}">-</button>
+                                {{ line_form.quantity }}
+                                <button type="button" class="qty-btn plus" onclick="var inp=this.previousElementSibling;inp.value=(parseInt(inp.value)||0)+1;inp.dispatchEvent(new Event('change'))">+</button>
+                            </div>
+                            {% if line_form.DELETE %}
+                            <button type="button" class="tl-remove" onclick="var row=this.closest('.tl-card');var del=row.querySelector('input[name$=-DELETE]');if(del){del.checked=true;row.style.display='none'}updateKPIs()" title="Remove"><i class="fa-solid fa-xmark"></i></button>
+                            {{ line_form.DELETE }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div id="emptyLines" class="transfer-empty">
+                    <i class="fa-solid fa-cart-plus" style="font-size:32px;opacity:.25;margin-bottom:10px;display:block"></i>
+                    <p style="font-size:14px;margin-bottom:4px">No items added yet</p>
+                    <p style="font-size:12px;color:var(--text-muted)">Select a source warehouse above, then click <strong>Add</strong> on products to transfer</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:center">
+            <button type="submit" class="btn btn-success" id="submitBtn"><i class="fa-solid fa-check"></i> Create Transfer</button>
+            <a href="{% url 'stock_transfer_list' %}" class="btn btn-danger">Cancel</a>
+        </div>
+    </form>
 </div>
+
+<script>
+(function(){
+    var srcSelect = document.querySelector('select[name="source_warehouse"]');
+    var dstSelect = document.querySelector('select[name="destination_warehouse"]');
+    var whFromName = document.getElementById('whFromName');
+    var whToName = document.getElementById('whToName');
+    var whHeroFrom = document.getElementById('whHeroFrom');
+    var whHeroTo = document.getElementById('whHeroTo');
+    var browseArea = document.getElementById('browseArea');
+    var browseCount = document.getElementById('browseCount');
+    var browseSearch = document.getElementById('browseSearch');
+    var browseSearchInput = document.getElementById('browseSearchInput');
+    var lineCount = document.getElementById('lineCount');
+    var emptyLines = document.getElementById('emptyLines');
+    var kpiRow = document.getElementById('kpiRow');
+    var formIdx = parseInt(document.querySelector('input[name="stocktransferline_set-TOTAL_FORMS"]').value) || 0;
+    var addedProducts = new Set();
+    var allStock = [];
+    var priceMap = {};
+
+    function fmt(n) { return 'Rs. ' + parseFloat(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0}); }
+
+    function updateWhNames() {
+        var srcOpt = srcSelect.options[srcSelect.selectedIndex];
+        var dstOpt = dstSelect.options[dstSelect.selectedIndex];
+        whFromName.textContent = srcSelect.value ? srcOpt.text : 'Select warehouse';
+        whToName.textContent = dstSelect.value ? dstOpt.text : 'Select warehouse';
+        whHeroFrom.classList.toggle('active', !!srcSelect.value);
+        whHeroTo.classList.toggle('active', !!dstSelect.value);
+    }
+    updateWhNames();
+    srcSelect.addEventListener('change', updateWhNames);
+    dstSelect.addEventListener('change', updateWhNames);
+
+    function updateLineCount() {
+        var visible = document.querySelectorAll('.tl-card:not([style*="display: none"])').length;
+        lineCount.textContent = '(' + visible + ' item' + (visible !== 1 ? 's' : '') + ')';
+        emptyLines.style.display = visible > 0 ? 'none' : 'block';
+    }
+
+    function updateKPIs() {
+        var visible = document.querySelectorAll('.tl-card:not([style*="display: none"])');
+        var items = visible.length;
+        var units = 0;
+        var cost = 0;
+        var value = 0;
+        visible.forEach(function(card) {
+            var pid = card.getAttribute('data-pid');
+            var qtyInp = card.querySelector('input[type="number"]');
+            var qty = parseInt(qtyInp ? qtyInp.value : 0) || 0;
+            units += qty;
+            if (pid && priceMap[pid]) {
+                cost += qty * parseFloat(priceMap[pid].cost);
+                value += qty * parseFloat(priceMap[pid].sale);
+            }
+        });
+        document.getElementById('kpiItems').textContent = items;
+        document.getElementById('kpiUnits').textContent = units;
+        document.getElementById('kpiCost').textContent = fmt(cost);
+        document.getElementById('kpiValue').textContent = fmt(value);
+        kpiRow.style.display = items > 0 ? '' : 'none';
+        updateLineCount();
+    }
+    window.updateKPIs = updateKPIs;
+    updateLineCount();
+
+    browseSearchInput.addEventListener('input', function() {
+        var q = this.value.toLowerCase();
+        renderBrowse(allStock.filter(function(s) {
+            return s.product_name.toLowerCase().indexOf(q) !== -1
+                || s.product_sku.toLowerCase().indexOf(q) !== -1
+                || (s.category && s.category.toLowerCase().indexOf(q) !== -1);
+        }));
+    });
+
+    if (srcSelect) {
+        srcSelect.addEventListener('change', function() {
+            var whId = this.value;
+            addedProducts.clear();
+            if (!whId) {
+                browseArea.innerHTML = '<div class="no-warehouse-msg"><i class="fa-solid fa-warehouse"></i><p>Select a <strong>Source Warehouse</strong> above to browse available products</p></div>';
+                browseCount.textContent = '';
+                browseSearch.style.display = 'none';
+                browseSearchInput.value = '';
+                allStock = [];
+                return;
+            }
+            if (srcSelect.value && dstSelect.value && srcSelect.value === dstSelect.value) {
+                browseArea.innerHTML = '<div class="no-warehouse-msg"><i class="fa-solid fa-triangle-exclamation" style="color:#eab308"></i><p><strong>Warning:</strong> Source and destination warehouses are the same. Please select different warehouses.</p></div>';
+                browseCount.textContent = '';
+                return;
+            }
+            browseArea.innerHTML = '<div class="loading-spinner"><i class="fa-solid fa-spinner fa-spin"></i> Loading warehouse inventory...</div>';
+            browseSearch.style.display = 'none';
+            browseSearchInput.value = '';
+            fetch('/inventory/api/warehouse-stock/' + whId + '/').then(function(r) { return r.json(); }).then(function(data) {
+                if (!data.stock || data.stock.length === 0) {
+                    browseArea.innerHTML = '<div class="no-warehouse-msg"><i class="fa-solid fa-box-open"></i><p>No products with stock available in this warehouse</p></div>';
+                    browseCount.textContent = '';
+                    allStock = [];
+                    return;
+                }
+                allStock = data.stock;
+                data.stock.forEach(function(s) {
+                    priceMap[s.product_id] = { cost: s.cost_price, sale: s.sale_price };
+                });
+                browseCount.innerHTML = '<span style="margin-right:12px">' + data.stock.length + ' product' + (data.stock.length !== 1 ? 's' : '') + '</span>'
+                    + '<span style="margin-right:12px;color:#059669">' + fmt(data.summary.total_cost_value) + ' cost</span>'
+                    + '<span style="color:#059669">' + fmt(data.summary.total_sale_value) + ' value</span>';
+                browseSearch.style.display = '';
+                renderBrowse(data.stock);
+            }).catch(function() {
+                browseArea.innerHTML = '<div class="no-warehouse-msg"><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i><p>Failed to load products. Please try again.</p></div>';
+                browseCount.textContent = '';
+                allStock = [];
+            });
+        });
+    }
+
+    function renderBrowse(items) {
+        var html = '';
+        items.forEach(function(s) {
+            var imgHtml = s.image_url
+                ? '<img src="' + s.image_url + '" class="browse-img" onerror="this.outerHTML=\'<div class=\\'browse-placeholder\\'><i class=\\'fa-solid fa-box\\'></i></div>\'">'
+                : '<div class="browse-placeholder"><i class="fa-solid fa-box"></i></div>';
+            var descHtml = s.description
+                ? '<div class="browse-desc">' + s.description + '</div>'
+                : '';
+            var alreadyAdded = addedProducts.has(s.product_id);
+            var unitVal = parseFloat(s.sale_price) || 0;
+            html += '<div class="browse-item" data-pid="' + s.product_id + '">'
+                + imgHtml
+                + '<div class="browse-details">'
+                + '<div class="browse-name">' + s.product_name + '</div>'
+                + '<div class="browse-sku">' + s.product_sku + (s.variant_name ? ' &middot; ' + s.variant_name : '') + '</div>'
+                + descHtml
+                + '</div>'
+                + '<div class="browse-cat"><i class="fa-solid fa-tag"></i> ' + (s.category || 'N/A') + '</div>'
+                + '<div class="browse-stock">'
+                + '<div class="browse-stock-qty">' + s.quantity + '</div>'
+                + '<div class="browse-stock-label">in stock</div>'
+                + '<div class="browse-stock-value">' + fmt(unitVal) + ' / ' + (s.unit_of_measure || 'unit') + '</div>'
+                + '</div>'
+                + '<div class="browse-actions">'
+                + (alreadyAdded
+                    ? '<span class="browse-added"><i class="fa-solid fa-check"></i> Added</span>'
+                    : '<button type="button" class="browse-add" onclick="addTransferLine(this,' + s.product_id + ',' + s.quantity + ')"><i class="fa-solid fa-plus"></i> Add</button>')
+                + '</div>'
+                + '</div>';
+        });
+        if (!items.length) {
+            html = '<div class="no-warehouse-msg"><i class="fa-solid fa-magnifying-glass"></i><p>No products match your search</p></div>';
+        }
+        browseArea.innerHTML = html;
+    }
+
+    window.addTransferLine = function(btn, productId, maxQty) {
+        addedProducts.add(productId);
+        btn.outerHTML = '<span class="browse-added"><i class="fa-solid fa-check"></i> Added</span>';
+        var prefix = 'stocktransferline_set';
+        var totalForms = document.querySelector('input[name="' + prefix + '-TOTAL_FORMS"]');
+        var idx = formIdx++;
+        totalForms.value = idx + 1;
+        var container = document.getElementById('transferLines');
+        var item = document.querySelector('.browse-item[data-pid="' + productId + '"]');
+        var name = item ? item.querySelector('.browse-name').textContent : 'Product';
+        var sku = item ? item.querySelector('.browse-sku').textContent.split('·')[0].trim() : '';
+        var imgEl = item ? item.querySelector('.browse-img, .browse-placeholder') : null;
+        var imgHtml = '';
+        if (imgEl) {
+            if (imgEl.tagName === 'IMG') imgHtml = '<img src="' + imgEl.src + '" class="tl-img">';
+            else imgHtml = '<div class="tl-placeholder"><i class="fa-solid fa-box"></i></div>';
+        } else {
+            imgHtml = '<div class="tl-placeholder"><i class="fa-solid fa-box"></i></div>';
+        }
+        var stockInfo = allStock.find(function(s) { return s.product_id === productId; });
+        var catName = stockInfo ? stockInfo.category : '';
+        var costPrice = stockInfo ? stockInfo.cost_price : '0';
+        var salePrice = stockInfo ? stockInfo.sale_price : '0';
+        var unit = stockInfo ? stockInfo.unit_of_measure : 'pcs';
+        var row = document.createElement('div');
+        row.className = 'tl-card';
+        row.setAttribute('data-pid', productId);
+        row.innerHTML = imgHtml
+            + '<div class="tl-info">'
+            + '<div class="tl-name">' + name + '</div>'
+            + '<div class="tl-sku">' + sku + (catName ? ' &middot; ' + catName : '') + '</div>'
+            + '<div class="tl-meta">'
+            + '<div class="tl-meta-item"><i class="fa-solid fa-coins"></i> Cost: <strong>' + fmt(costPrice) + '</strong></div>'
+            + '<div class="tl-meta-item"><i class="fa-solid fa-tag"></i> Sale: <strong>' + fmt(salePrice) + '</strong></div>'
+            + '<div class="tl-meta-item"><i class="fa-solid fa-cubes"></i> Max: <strong>' + maxQty + ' ' + unit + '</strong></div>'
+            + '</div>'
+            + '<select name="' + prefix + '-' + idx + '-product" style="display:none"><option value="' + productId + '" selected>' + name + '</option></select>'
+            + '</div>'
+            + '<div class="tl-right">'
+            + '<div class="qty-control">'
+            + '<button type="button" class="qty-btn minus" onclick="var inp=this.nextElementSibling;var v=parseInt(inp.value)||1;if(v>1){inp.value=v-1}updateKPIs()">-</button>'
+            + '<input type="number" name="' + prefix + '-' + idx + '-quantity" value="1" min="1" max="' + maxQty + '" required onchange="updateKPIs()" oninput="updateKPIs()">'
+            + '<button type="button" class="qty-btn plus" onclick="var inp=this.previousElementSibling;inp.value=(parseInt(inp.value)||0)+1;updateKPIs()">+</button>'
+            + '</div>'
+            + '<button type="button" class="tl-remove" onclick="var del=this.nextElementSibling;if(del)del.checked=true;this.closest(\'.tl-card\').style.display=\'none\';updateKPIs()" title="Remove"><i class="fa-solid fa-xmark"></i></button>'
+            + '<input type="checkbox" name="' + prefix + '-' + idx + '-DELETE" style="display:none">'
+            + '<input type="hidden" name="' + prefix + '-' + idx + '-id" value="">'
+            + '<input type="hidden" name="' + prefix + '-' + idx + '-transfer" value="">'
+            + '</div>';
+        container.appendChild(row);
+        updateKPIs();
+    };
+
+    // Restore state on page reload with errors
+    document.querySelectorAll('.tl-card').forEach(function(card) {
+        var select = card.querySelector('select[name$="-product"]');
+        if (select && select.value) {
+            addedProducts.add(parseInt(select.value));
+        }
+    });
+    updateKPIs();
+})();
+</script>
 {% endblock %}

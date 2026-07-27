@@ -1,10 +1,18 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Payment Methods{% endblock %}
-{% block page_title %}Payment Methods Analysis{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'reports_home' %}" class="btn btn-outline btn-sm"><i class="fa-solid fa-arrow-left"></i> Back to Reports</a>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+    <a href="{% url 'reports_home' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+</div>
+    <h1 class="form-header-title"><i class="fa-solid fa-credit-card" style="color:var(--primary);margin-right:8px"></i>Payment Methods</h1>
 </div>
 <div class="flex-between mb-4">
     <div class="flex gap-2">
@@ -17,7 +25,8 @@
 <div class="kpi-grid stagger-in mb-4">
     <div class="kpi-card"><div class="kpi-icon green"><i class="fa-solid fa-money-bill-wave"></i></div><div class="kpi-info"><div class="kpi-label">Total Collected</div><div class="kpi-value">रू {{ total_amount|floatformat:0|nepali }}</div></div></div>
     <div class="kpi-card"><div class="kpi-icon blue"><i class="fa-solid fa-receipt"></i></div><div class="kpi-info"><div class="kpi-label">Total Payments</div><div class="kpi-value">{{ total_count|nepali }}</div></div></div>
-    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-calculator"></i></div><div class="kpi-info"><div class="kpi-label">Avg Payment</div><div class="kpi-value">रू {% if total_count %}{{ total_amount|floatformat:0|nepali }}{% else %}0{% endif %}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon purple"><i class="fa-solid fa-calculator"></i></div><div class="kpi-info"><div class="kpi-label">Avg Payment</div><div class="kpi-value">रू {{ avg_payment|floatformat:0|nepali }}</div></div></div>
+    <div class="kpi-card"><div class="kpi-icon orange"><i class="fa-solid fa-credit-card"></i></div><div class="kpi-info"><div class="kpi-label">Payment Methods</div><div class="kpi-value">{{ by_method|length|nepali }}</div></div></div>
 </div>
 
 <div class="grid-2 gap-4 mb-4">

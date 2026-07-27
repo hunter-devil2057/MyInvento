@@ -1,22 +1,33 @@
 {% extends 'base.html' %}
 {% load number_tags %}
 {% block title %}Transaction {{ transaction.invoice_number|default:"Draft" }}{% endblock %}
-{% block page_title %}Transaction {{ transaction.invoice_number|default:"Draft" }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    <a href="{% url 'transaction_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Transactions</a>
-    <div></div>
-    <div class="flex gap-2">
-        {% if transaction.status == 'Completed' %}
-        <a href="{% url 'transaction_receipt' transaction.uuid %}" class="btn btn-outline" target="_blank">View Receipt</a>
-        <a href="{% url 'return_create' transaction.uuid %}" class="btn btn-warning">Process Return</a>
-        {% endif %}
-        {% if transaction.status == 'Draft' %}
-        <a href="{% url 'pos' %}" class="btn btn-primary">Continue Editing</a>
-        {% endif %}
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+    .form-header-row { display: flex; align-items: center; justify-content: space-between; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'transaction_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <div class="form-header-row">
+        <div></div>
+        <h1 class="form-header-title" style="flex:1">Transaction {{ transaction.invoice_number|default:"Draft" }}</h1>
+        <div class="flex gap-2">
+            {% if transaction.status == 'Completed' %}
+            <a href="{% url 'transaction_receipt' transaction.uuid %}" class="btn btn-success btn-sm" target="_blank"><i class="fa-solid fa-receipt"></i> View Receipt</a>
+            <a href="{% url 'return_create' transaction.uuid %}" class="btn btn-warning btn-sm"><i class="fa-solid fa-rotate-left"></i> Process Return</a>
+            {% endif %}
+            {% if transaction.status == 'Draft' %}
+            <a href="{% url 'pos' %}" class="btn btn-success"><i class="fa-solid fa-pen"></i> Continue Editing</a>
+            {% endif %}
+        </div>
     </div>
 </div>
-<div class="grid-3 mb-6">
+<div class="grid-3 mb-6" style="text-align:center">
     <div class="card"><div class="card-body">
         <div class="kpi-label">Customer</div><div style="font-weight:600">{{ transaction.customer|default:"Walk-in" }}</div>
         <div class="text-sm text-muted mt-2">Channel: {{ transaction.channel }}</div>

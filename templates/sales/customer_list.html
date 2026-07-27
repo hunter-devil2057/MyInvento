@@ -2,16 +2,27 @@
 {% load number_tags %}
 {% load pagination_tags %}
 {% block title %}Customers{% endblock %}
-{% block page_title %}Customers{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <h1 class="form-header-title"><i class="fa-solid fa-users" style="color:var(--primary);margin-right:8px"></i> Customers</h1>
+</div>
 <div style="display:flex;justify-content:center;margin-bottom:24px">
     <form method="get" class="search-box" style="width:320px;max-width:100%"><input type="text" name="q" value="{{ query }}" class="form-input" placeholder="Search customers..." style="text-align:center"></form>
 </div>
 <div class="flex-between mb-4">
-    <div class="text-muted" style="font-size:14px">Total: <strong>{{ customers.paginator.count }}</strong> customers</div>
+    <div class="text-muted" style="font-size:14px"><i class="fa-solid fa-users" style="margin-right:4px"></i> Total: <strong>{{ customers.paginator.count }}</strong> customers</div>
     <div class="flex gap-2">
         <a href="{% url 'export_csv' 'customers' %}" class="btn btn-outline">Export CSV</a>
-        <a href="{% url 'customer_create' %}" class="btn btn-primary">+ Add Customer</a>
+        <a href="{% url 'customer_create' %}" class="btn btn-success"><i class="fa-solid fa-plus"></i> Add Customer</a>
     </div>
 </div>
 <div class="card">
@@ -21,13 +32,13 @@
             <tbody>
                 {% for c in customers %}
                 <tr>
-                    <td><a href="{% url 'customer_detail' c.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none">{{ c.name }}</a></td>
+                    <td><a href="{% url 'customer_detail' c.uuid %}" style="font-weight:600;color:var(--primary);text-decoration:none"><i class="fa-solid fa-user" style="margin-right:6px;opacity:.5"></i>{{ c.name }}</a></td>
                     <td class="text-sm">{{ c.email|default:"-" }}</td>
                     <td class="text-sm">{{ c.phone|default:"-" }}</td>
                     <td>{% if c.is_active %}<span class="badge badge-success">Active</span>{% else %}<span class="badge badge-danger">Inactive</span>{% endif %}</td>
                     <td>
                         <div style="display:flex;gap:6px">
-                            <a href="{% url 'customer_edit' c.uuid %}" class="btn btn-outline btn-sm">Edit</a>
+                            <a href="{% url 'customer_edit' c.uuid %}" class="btn btn-success btn-sm"><i class="fa-solid fa-pen"></i> Edit</a>
                             {% if request.user.is_superuser or request.user.profile.role == 'admin' %}
                             <form method="post" action="{% url 'customer_delete' c.uuid %}" style="display:inline" onsubmit="return confirm('Delete customer {{ c.name }}?')">
                                 {% csrf_token %}
@@ -38,7 +49,7 @@
                     </td>
                 </tr>
                 {% empty %}
-                <tr><td colspan="5"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-users"></i></span><h3>No customers yet</h3><p>Add your first customer to get started.</p><a href="{% url 'customer_create' %}" class="btn btn-primary mt-2">+ Add Customer</a></div></td></tr>
+                <tr><td colspan="5"><div class="empty-state"><span class="empty-icon"><i class="fa-solid fa-users"></i></span><h3>No customers yet</h3><p>Add your first customer to get started.</p><a href="{% url 'customer_create' %}" class="btn btn-success mt-2">+ Add Customer</a></div></td></tr>
                 {% endfor %}
             </tbody>
         </table>

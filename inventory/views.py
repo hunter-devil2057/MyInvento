@@ -112,8 +112,11 @@ def stock_adjust_product_view(request, product_uuid):
         )
         messages.success(request, f'Stock adjusted: {product.name} ({quantity_delta:+d}) at {warehouse.name}')
         return redirect('stock_overview')
+    stock_levels = StockLevel.objects.filter(product=product).select_related('warehouse')
+    total_stock = stock_levels.aggregate(total=Sum('quantity_on_hand'))['total'] or 0
     return render(request, 'inventory/stock_adjust_form.html', {
         'product': product, 'warehouses': warehouses, 'reason_codes': reason_codes,
+        'stock_levels': stock_levels, 'total_stock': total_stock,
     })
 
 

@@ -1,14 +1,20 @@
 {% extends 'base.html' %}
 {% block title %}Return #{{ return_request.pk }}{% endblock %}
-{% block page_title %}Return #{{ return_request.pk }}{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div class="flex-between mb-6">
-    <a href="{% url 'return_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back to Returns</a>
-    <div></div>
-    <div></div>
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'return_list' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <h1 class="form-header-title">Return #{{ return_request.pk }}</h1>
 </div>
 <div class="card mb-6">
-    <div class="card-body">
+    <div class="card-body" style="text-align:center">
         <div class="grid-3">
             <div><div class="kpi-label">Invoice</div><a href="{% url 'transaction_detail' return_request.original_transaction.uuid %}" style="color:var(--primary);font-weight:600">{{ return_request.original_transaction.invoice_number }}</a></div>
             <div><div class="kpi-label">Status</div><span class="badge {% if return_request.status == 'Completed' %}badge-success{% elif return_request.status == 'Requested' %}badge-warning{% else %}badge-secondary{% endif %}">{{ return_request.status }}</span></div>
@@ -35,7 +41,7 @@
     </div>
 </div>
 {% if return_request.status == 'Requested' %}
-<div class="flex gap-2">
+<div class="flex gap-2" style="justify-content:center">
     <form method="post" action="{% url 'return_process' return_request.uuid %}" onsubmit="return confirm('Approve this return and process the refund?')">
         {% csrf_token %}
         <input type="hidden" name="action" value="approve">
