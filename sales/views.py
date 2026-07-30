@@ -633,6 +633,14 @@ def customer_create_view(request):
     if request.method == 'POST':
         form = CustomerForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data.get('email')
+            existing = Customer.objects.filter(email__iexact=email).first() if email else None
+            if existing:
+                Customer.objects.filter(pk=existing.pk).update(**{k: v for k, v in form.cleaned_data.items() if k not in ('name',)})
+                customer = Customer.objects.get(pk=existing.pk)
+                log_action(request.user, 'Update', 'Customer', customer.pk, f'Updated existing customer via create: {customer.name}', ip_address=request.META.get('REMOTE_ADDR'))
+                messages.info(request, f'Customer with this email already existed. Updated "{customer.name}" instead.')
+                return redirect('customer_detail', uuid=customer.uuid)
             customer = form.save()
             log_action(request.user, 'Create', 'Customer', customer.pk, f'Created customer: {customer.name}', ip_address=request.META.get('REMOTE_ADDR'))
             from notifications.utils import notify_admins

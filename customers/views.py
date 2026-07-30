@@ -38,9 +38,18 @@ def portal_register_view(request):
         password = request.POST.get('password')
         phone = request.POST.get('phone', '')
         from django.contrib.auth.models import User
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email already registered.')
-            return redirect('portal_register')
+        existing_user = User.objects.filter(email__iexact=email).first()
+        if existing_user:
+            user = authenticate(request, username=existing_user.username, password=password)
+            if user:
+                login(request, user)
+                Customer.objects.get_or_create(user=user, defaults={'name': name, 'email': email, 'phone': phone})
+                from accounts.models import UserProfile
+                UserProfile.objects.get_or_create(user=user, defaults={'role': 'customer'})
+                messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+                return redirect('portal_catalog')
+            messages.info(request, 'This email is already registered. Please log in.')
+            return redirect('portal_login')
         user = User.objects.create_user(
             username=email, email=email, password=password,
             first_name=name.split()[0] if name else '',

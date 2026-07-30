@@ -47,6 +47,12 @@ class UserRegistrationForm(UserCreationForm):
         self.fields['password2'].label = ''
         self.fields['password1'].help_text = ''
 
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError('A user with this email already exists.')
+        return email
+
 
 class UserProfileForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=True)
@@ -67,6 +73,27 @@ class UserProfileForm(forms.ModelForm):
         for field_name in self.fields:
             self.fields[field_name].widget.attrs.update({'class': 'form-input'})
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '')
+        if phone:
+            qs = UserProfile.objects.filter(phone=phone)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('This phone number is already in use by another user.')
+        return phone
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '')
+        if email:
+            from django.contrib.auth.models import User
+            qs = User.objects.filter(email__iexact=email)
+            if self.instance and hasattr(self.instance, 'user') and self.instance.user_id:
+                qs = qs.exclude(pk=self.instance.user_id)
+            if qs.exists():
+                raise forms.ValidationError('A user with this email already exists.')
+        return email
+
 
 class UserForm(forms.ModelForm):
     class Meta:
@@ -77,3 +104,12 @@ class UserForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name in self.fields:
             self.fields[field_name].widget.attrs.update({'class': 'form-input'})
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        qs = User.objects.filter(email__iexact=email)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('A user with this email already exists.')
+        return email

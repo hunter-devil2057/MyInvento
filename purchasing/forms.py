@@ -53,3 +53,16 @@ class ReorderRuleForm(forms.ModelForm):
             'max_quantity': forms.NumberInput(attrs={'class': 'form-input', 'min': '0'}),
             'default_supplier': forms.Select(attrs={'class': 'form-input'}),
         }
+
+    def clean(self):
+        cleaned = super().clean()
+        product = cleaned.get('product')
+        variant = cleaned.get('variant')
+        warehouse = cleaned.get('warehouse')
+        if product and warehouse:
+            qs = ReorderRule.objects.filter(product=product, variant=variant, warehouse=warehouse)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('A reorder rule for this product/variant/warehouse combination already exists.')
+        return cleaned

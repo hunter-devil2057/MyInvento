@@ -4,10 +4,10 @@ from django.db import models
 
 class Supplier(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    name = models.CharField(max_length=150)
+    name = models.CharField(max_length=150, unique=True)
     contact_name = models.CharField(max_length=150, blank=True)
-    email = models.EmailField(blank=True)
-    phone = models.CharField(max_length=20, blank=True)
+    email = models.EmailField(blank=True, null=True, default=None, unique=True)
+    phone = models.CharField(max_length=20, blank=True, null=True, default=None, unique=True)
     address = models.TextField(blank=True)
     lead_time_days = models.IntegerField(default=7)
     on_time_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)

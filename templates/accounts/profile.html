@@ -1,10 +1,21 @@
 {% extends 'base.html' %}
 {% block title %}Profile{% endblock %}
-{% block page_title %}Profile Settings{% endblock %}
+{% block page_title %}{% endblock %}
 {% block content %}
-<div style="max-width:600px">
+<style>
+    .form-header { margin-bottom: 28px; }
+    .form-header-back { margin-bottom: 12px; text-align: left; }
+    .form-header-title { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; text-align: center; }
+</style>
+<div class="form-header">
+    <div class="form-header-back">
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost"><i class="fa-solid fa-arrow-left"></i> Back</a>
+    </div>
+    <h1 class="form-header-title"><i class="fa-solid fa-user" style="color:var(--primary);margin-right:8px"></i> Profile Settings</h1>
+</div>
+
+<div style="max-width:600px;margin:0 auto">
     <div class="card">
-        <div class="card-header"><h3>Your Profile</h3></div>
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
@@ -29,8 +40,16 @@
                 <div class="form-group">
                     <label class="form-label">Role</label>
                     <input type="text" class="form-input" value="{{ profile.get_role_display }}" disabled>
+                    <input type="hidden" name="role" value="{{ profile.role }}">
                 </div>
-                <button type="submit" class="btn btn-primary">Save Changes</button>
+                {% if form.errors %}
+                <div style="color:#dc2626;font-size:13px;margin-bottom:12px">
+                    {% for field, errors in form.errors.items %}
+                        {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <button type="submit" class="btn" style="background:#16a34a;color:#fff;display:block;margin:0 auto">Save Changes</button>
             </form>
         </div>
     </div>

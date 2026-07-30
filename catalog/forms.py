@@ -11,6 +11,15 @@ class CategoryForm(forms.ModelForm):
             'parent': forms.Select(attrs={'class': 'form-input'}),
         }
 
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        qs = Category.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('A category with this name already exists.')
+        return name
+
 
 class ProductForm(forms.ModelForm):
     primary_image_file = forms.ImageField(

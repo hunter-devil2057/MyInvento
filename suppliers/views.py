@@ -27,6 +27,14 @@ def supplier_create_view(request):
     if request.method == 'POST':
         form = SupplierForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data.get('email')
+            existing = Supplier.objects.filter(email__iexact=email).first() if email else None
+            if existing:
+                Supplier.objects.filter(pk=existing.pk).update(**form.cleaned_data)
+                supplier = Supplier.objects.get(pk=existing.pk)
+                log_action(request.user, 'Update', 'Supplier', supplier.pk, f'Updated existing supplier via create: {supplier.name}')
+                messages.info(request, f'Supplier with this email already existed. Updated "{supplier.name}" instead.')
+                return redirect('supplier_detail', uuid=supplier.uuid)
             supplier = form.save()
             log_action(request.user, 'Create', 'Supplier', supplier.pk, f'Created supplier: {supplier.name}')
             from notifications.utils import notify_admins

@@ -9,7 +9,7 @@ from io import BytesIO
 
 class Category(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=120, unique=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     created_at = models.DateTimeField(auto_now_add=True)

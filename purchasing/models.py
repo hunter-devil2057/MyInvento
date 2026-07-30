@@ -77,6 +77,7 @@ class ReorderRule(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
+        unique_together = ('product', 'variant', 'warehouse')
         ordering = ['product']
 
     def __str__(self):

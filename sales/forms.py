@@ -77,6 +77,26 @@ class CustomerForm(forms.ModelForm):
             'default_address': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
         }
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '')
+        if email:
+            qs = Customer.objects.filter(email__iexact=email)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('A customer with this email already exists.')
+        return email
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '')
+        if phone:
+            qs = Customer.objects.filter(phone=phone)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('A customer with this phone number already exists.')
+        return phone
+
 
 class SalesChannelForm(forms.ModelForm):
     class Meta:

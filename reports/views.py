@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, F, DecimalField, ExpressionWrapper, Avg, Value
 from django.db.models.functions import TruncMonth
@@ -24,6 +24,8 @@ def dashboard_view(request):
     if hasattr(request.user, 'profile'):
         profile = request.user.profile
         role = profile.role
+        if role == 'customer':
+            return redirect('portal_home')
 
     now = timezone.now()
     thirty_days_ago = now - datetime.timedelta(days=30)

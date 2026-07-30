@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 
 class Warehouse(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True, db_index=True)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     address = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

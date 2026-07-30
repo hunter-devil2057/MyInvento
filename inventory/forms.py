@@ -11,6 +11,15 @@ class WarehouseForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
         }
 
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        qs = Warehouse.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('A warehouse with this name already exists.')
+        return name
+
 
 class StockAdjustForm(forms.Form):
     warehouse = forms.ModelChoiceField(queryset=Warehouse.objects.filter(is_active=True), widget=forms.Select(attrs={'class': 'form-input'}))

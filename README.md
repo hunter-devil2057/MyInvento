@@ -53,6 +53,7 @@ Whether you're running a single warehouse or coordinating across multiple locati
 - **Return Requests** — Submit return requests from order detail page
 - **Complaint System** — Submit complaints by category (product quality, delivery, payment, service, website, refund, other) with priority levels and threaded admin replies
 - **Account Settings** — Profile management for portal users
+- **Smart Registration** — Portal registration detects existing email addresses and offers login instead of blocking; get-or-create logic links returning customers to their existing records
 
 ### Notification System
 - **Automatic Notifications** — 13+ signal handlers trigger notifications on every system action (stock adjustments, PO status changes, sales, returns, complaints, user changes, transfers, shrinkage)
@@ -74,15 +75,17 @@ Whether you're running a single warehouse or coordinating across multiple locati
 
 ### Security & Audit
 - **Role-Based Access Control** — Admin, Warehouse, Sales, Purchasing, Auditor, Customer roles with `LoginRequiredMiddleware`
+- **Customer Access Restriction** — Customers are automatically redirected from the admin dashboard to the customer portal on login; direct `/dashboard/` access also redirects away
 - **Audit Logging** — Every Create/Update/Delete/Login/Logout action logged with user, timestamp, IP, before/after JSON snapshots
 - **Session Management** — Configurable session timeout, max login attempts, lockout duration
 - **Admin-Only Registration** — User registration restricted to admin users via role check
+- **Duplicate Value Prevention** — Unique database constraints on email, phone, SKU, barcode, name, and other identifiers across all models (products, suppliers, customers, staff, warehouses, categories, reorder rules); form-level validation provides user-friendly error messages on duplicates; get-or-create logic handles existing records gracefully during registration and creation flows
 
 ### UI/UX
 - **Responsive Design** — Mobile-first layout; notification panel becomes bottom-sheet on ≤480px
 - **Consistent Theming** — Indigo/purple primary (`#6366f1`), warm white backgrounds (`#FAF9F6`), Linen borders (`#E9DCC9`)
-- **Form Headers** — Consistent back-button + centered title pattern across all forms and detail pages
-- **Sidebar Navigation** — Role-aware sidebar with badge pills for notifications and alerts
+- **Form Headers** — Consistent back-button + centered title pattern across all forms and detail pages including profile settings
+- **Sidebar Navigation** — Role-aware sidebar with badge pills for notifications and alerts; admin panel link hidden for non-admin roles
 - **Alpine.js Integration** — Interactive notification panel, dropdowns, and dynamic content
 - **Nepali Rupee (रू)** — All price displays formatted with NPR currency symbol
 

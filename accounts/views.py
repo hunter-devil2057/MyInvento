@@ -15,6 +15,8 @@ from audit.utils import log_action
 
 def login_view(request):
     if request.user.is_authenticated:
+        if hasattr(request.user, 'profile') and request.user.profile.role == 'customer':
+            return redirect('portal_home')
         return redirect('dashboard')
     if request.method == 'POST':
         form = LoginForm(request, data=request.POST)
@@ -23,6 +25,8 @@ def login_view(request):
             login(request, user)
             log_action(user, 'Login', 'User', user.pk, f'{user.username} logged in', ip_address=request.META.get('REMOTE_ADDR'))
             messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+            if hasattr(user, 'profile') and user.profile.role == 'customer':
+                return redirect('portal_home')
             return redirect('dashboard')
     else:
         form = LoginForm()

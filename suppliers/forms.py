@@ -16,3 +16,32 @@ class SupplierForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
             'lead_time_days': forms.NumberInput(attrs={'class': 'form-input', 'min': '0'}),
         }
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        qs = Supplier.objects.filter(name__iexact=name)
+        if self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('A supplier with this name already exists.')
+        return name
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '')
+        if email:
+            qs = Supplier.objects.filter(email__iexact=email)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('A supplier with this email already exists.')
+        return email
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '')
+        if phone:
+            qs = Supplier.objects.filter(phone=phone)
+            if self.instance.pk:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise forms.ValidationError('A supplier with this phone number already exists.')
+        return phone
